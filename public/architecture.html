@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>adorn Architecture | Contracts as data</title>
+  <meta name="description" content="How adorn records constraints as reified descriptors, installs enforcement, and derives every projection from one registry.">
+  <meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#131219" media="(prefers-color-scheme: dark)">
+  <link rel="canonical" href="https://adorn-ts.dev/architecture.html">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <script>try{var t=localStorage.getItem('adorn-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html" aria-label="adorn home">
+        <img class="logo-mark" src="assets/logo.svg" alt="" width="32" height="32">
+        adorn <span class="logo-version">0.1</span>
+      </a>
+      <nav class="site-nav" id="siteNav" aria-label="Site">
+        <a href="index.html">Overview</a>
+        <a href="index.html#playground">Playground</a>
+        <a href="architecture.html" aria-current="page">Architecture</a>
+        <a href="reference.html">Reference</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-button" type="button" data-theme-toggle aria-label="Toggle theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <a class="icon-button" href="https://github.com/natwhite/adorn" aria-label="adorn on GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.8 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5z"/></svg>
+        </a>
+        <button class="icon-button menu-toggle" type="button" aria-expanded="false" aria-controls="siteNav" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="doc-hero">
+      <div class="container">
+        <p class="eyebrow">Architecture</p>
+        <h1>The decorator is the adapter.<br>The descriptor is the foundation.</h1>
+        <p class="lede">
+          Every artifact adorn produces is read from one registry of reified contract descriptors. This page
+          covers how they're recorded, how enforcement is installed, and the rules every projection follows,
+          so that "can't drift" holds by construction rather than by discipline.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#trick">Trace the core trick</a>
+          <a class="button ghost" href="reference.html">Open the reference</a>
+          <a class="button ghost" href="https://github.com/natwhite/adorn/blob/master/docs/DECISIONS.md">Read the decision log</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container doc-layout">
+      <nav class="toc" aria-label="On this page">
+        <p>On this page</p>
+        <ol>
+          <li><a href="#rules">Design rules</a></li>
+          <li><a href="#trick">The core trick</a></li>
+          <li><a href="#descriptors">Descriptors as data</a></li>
+          <li><a href="#bands">Bands &amp; blame</a></li>
+          <li><a href="#trust">Trust &amp; enforcement</a></li>
+          <li><a href="#inheritance">Inheritance</a></li>
+          <li><a href="#projections">Projection rules</a></li>
+          <li><a href="#strict">Strict mode</a></li>
+          <li><a href="#privacy">Redaction &amp; privacy</a></li>
+          <li><a href="#observability">Observability seam</a></li>
+          <li><a href="#testing">Testing projection</a></li>
+          <li><a href="#boundaries">Deliberate boundaries</a></li>
+        </ol>
+      </nav>
+
+      <article class="doc">
+        <section id="rules">
+          <h2>Design rules</h2>
+          <p>Five rules constrain every implementation choice. Most of the decision log is these rules being applied to a specific case.</p>
+          <div class="grid grid-2">
+            <div class="card"><h3>One descriptor, many readers</h3><p>Enforcement, docs, schemas, telemetry and fuzzers read the same recorded data. No projection is allowed its own copy of a constraint (DEC-006, DEC-010).</p></div>
+            <div class="card"><h3>Degrade toward the weaker truth</h3><p>When a projection can't express something exactly, it says less, never more. An over-claiming schema is worse than none (DEC-029).</p></div>
+            <div class="card"><h3>Validate, never coerce</h3><p>adorn rejects an invalid value. It never silently converts, defaults or transforms it, so a malformed argument is always a violation.</p></div>
+            <div class="card"><h3>Safe by default</h3><p>Every path adorn emits through redacts values without reading any annotation. Disclosure is opt-in, and <code>@Sensitive</code> vetoes it (DEC-030).</p></div>
+          </div>
+          <div class="callout">
+            <strong>Frozen reads, private writes</strong>
+            <p>The registry's read surface (<code>getContracts</code>, <code>getEffective…</code>) is semver-frozen public API. Its writers are deliberately not exported, because they would bypass the adapter that owns ordering and installation (DEC-039).</p>
+          </div>
+        </section>
+
+        <section id="trick">
+          <h2>The core trick</h2>
+          <p>
+            A legacy TypeScript parameter decorator runs once, at class-definition time, and receives only
+            <code>(target, propertyKey, parameterIndex)</code>. It never sees an argument. adorn bridges that
+            gap in two phases.
+          </p>
+          <div class="flow" role="img" aria-label="Flow: parameter decorators record descriptors into the registry; @Contract installs wrappers; projections read the registry.">
+            <div class="flow-row"><b>1 · record</b><span><code>@GreaterThanEqual(1)</code> files a descriptor against <code>(prototype, 'getWeather', 2)</code> in the contract registry. It writes nothing to the method itself.</span></div>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <div class="flow-row"><b>2 · install</b><span><code>@Contract()</code> is a class decorator, so it runs <em>after</em> every member decorator. By then the registry holds the whole class, and it replaces each contracted method with a wrapper that checks the recorded constraints before delegating.</span></div>
+            <div class="flow-arrow" aria-hidden="true">↓</div>
+            <div class="flow-row"><b>3 · project</b><span>Projections never touch the wrapper. They read the registry directly, which is why every artifact sees exactly what enforcement sees:</span></div>
+            <div class="flow-fan">
+              <div><code>toolSchemaForMethod</code></div>
+              <div><code>schemaForClass</code></div>
+              <div><code>renderMarkdown</code></div>
+              <div><code>telemetryForClass</code></div>
+              <div><code>ObservationSink</code></div>
+              <div><code>fuzzClass</code> · <code>fuzzSequence</code></div>
+            </div>
+          </div>
+          <div class="callout warn">
+            <strong><code>@Contract()</code> is required</strong>
+            <p>Parameter constraints do nothing on their own. A class that declares them without <code>@Contract()</code> isn't enforced and is invisible to every projection. Because that failure is silent, adorn emits a development-mode warning naming the class and methods. <code>@Validate()</code> is the per-method alternative, but class-level <code>@Contract()</code> installs outermost, so guard-before-flow holds by construction (DEC-043).</p>
+          </div>
+          <p>Constraints evaluate in declaration order: parameters left to right, stacked decorators top to bottom. When several arguments are invalid, the first one in the signature is the one reported (DEC-015, DEC-017).</p>
+        </section>
+
+        <section id="descriptors">
+          <h2>Descriptors as data</h2>
+          <p>
+            The load-bearing move is that a constraint isn't an opaque closure that throws. It's a <strong>reified
+            descriptor</strong>: an identity plus JSON-serializable params, with the predicate derived from those
+            params. <code>@GreaterThanEqual(1)</code> is a thin <code>@</code>-syntax adapter over
+            <code>NumberContracts.GreaterThanEqual(1)</code>.
+          </p>
+          <figure class="code">
+            <div class="code-head"><span>a custom constraint is first-class</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+import { defineConstraint, Verify, toolSchemaFrom, type JsonObject } from 'adorn';
+
+const even = defineConstraint&lt;JsonObject, number&gt;({
+    kind: 'number',
+    constraint: 'custom.even.v1',              // unique identity: the rehydration key
+    derive: () =&gt; (v: unknown) =&gt;              // the predicate is DERIVED from params
+        typeof v === 'number' &amp;&amp; Number.isInteger(v) &amp;&amp; v % 2 === 0,
+    describe: () =&gt; 'an even integer',
+    schema: () =&gt; ({ type: 'integer', multipleOf: 2 }),
+});
+
+Verify.check(even({}), 'seats', 3);              // { ok: false, … 'an even integer' }
+toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', multipleOf: 2 }
+</pre>
+          </figure>
+          <p>
+            Because the descriptor is data, the same object can be turned into a schema keyword, a docs row, a
+            <code>fast-check</code> generator and the runtime predicate. It also round-trips through JSON, which
+            is what lets compositional constraints such as <code>ArrayOf</code>, <code>Dictionary</code>,
+            <code>Shape</code> and <code>Nullable</code> nest.
+          </p>
+          <h3>Total predicates</h3>
+          <p>
+            Every built-in predicate is total: a <code>null</code>, <code>NaN</code> or wrong-type argument reports a
+            contract violation, never a bare <code>TypeError</code>. That matters twice over. A fuzzer feeds
+            those values first, and a schema claims a <code>type</code> on the strength of it. It's also why
+            <code>required</code> can be derived soundly: a missing argument already fails at runtime.
+          </p>
+        </section>
+
+        <section id="bands">
+          <h2>Bands &amp; blame</h2>
+          <p>A contracted call passes through ordered bands. Each band names who is at fault when it fails, and whether it can be projected.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Band</th><th>Reads</th><th>Runs</th><th>Blames</th><th>Projectable</th></tr></thead>
+              <tbody>
+                <tr><td><code>@EnabledWhen</code></td><td>receiver + args</td><td>before</td><td>caller ("not enabled in this state")</td><td><span class="pill warn">no, closure</span></td></tr>
+                <tr><td>Parameter constraints</td><td>one argument</td><td>before</td><td>caller</td><td><span class="pill ok">yes</span></td></tr>
+                <tr><td><code>@Requires</code></td><td>all args</td><td>before</td><td>caller</td><td><span class="pill warn">no, closure</span></td></tr>
+                <tr><td><code>@Returns</code></td><td>settled result</td><td>after</td><td>callee</td><td><span class="pill ok">yes</span></td></tr>
+                <tr><td><code>@Ensures</code></td><td>result + args</td><td>after</td><td>callee</td><td><span class="pill warn">no, closure</span></td></tr>
+                <tr><td>Field <code>@Enforce</code></td><td>assigned value</td><td>on set</td><td>assigner</td><td><span class="pill ok">yes</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <code>@EnabledWhen</code> is deliberately a separate band from <code>@Requires</code>. For enforcement
+            alone they behave the same, but they mean opposite things downstream. A failed
+            <code>@Requires</code> means "these arguments are never valid", which is a generation signal that
+            shapes an input schema. A failed <code>@EnabledWhen</code> means "correctly not enabled in this
+            state", an expected skip that no choice of arguments could satisfy (DEC-089).
+          </p>
+          <p>The postcondition bands run on the <em>settled</em> value. adorn's shared <code>settle</code> classifier handles sync returns, thenables and observable-like values, so an async method's contract is checked against what it resolves to.</p>
+        </section>
+
+        <section id="trust">
+          <h2>Trust &amp; enforcement</h2>
+          <p>Each contract is classified by trust (DEC-008):</p>
+          <ul>
+            <li><strong><code>guard</code></strong> (the default) validates untrusted input and stays on in production. Only <code>disableGuardEnforcement({confirm, reason})</code> strips it.</li>
+            <li><strong><code>assert</code></strong> is an internal self-check that's stripped in production.</li>
+          </ul>
+          <p>
+            <code>setViolationPolicy('throw' | 'warn' | handler)</code> controls what happens on a violation.
+            <code>'warn'</code> proceeds into the method, which is what makes it possible to stage a new contract
+            over live traffic before it starts rejecting.
+          </p>
+          <div class="callout">
+            <strong>Process-level configuration</strong>
+            <p>The configuration family is set once at startup, not per request. Set at boot it's safe under concurrency. The data-first core (constraint decorators, <code>*Contracts</code> descriptors, <code>Verify.check</code>) is pure and carries no ambient state at all.</p>
+          </div>
+        </section>
+
+        <section id="inheritance">
+          <h2>Inheritance: strengthen, never weaken</h2>
+          <p>
+            A subclass's field is checked against the union of every declaration on its prototype chain, and an
+            overridden method inherits its parent's preconditions (DEC-021, DEC-022). A subclass can add
+            constraints but can't remove one. <code>@Optional</code> follows <strong>required-wins</strong>: if
+            any level requires a parameter, it's required.
+          </p>
+          <p>The <code>getEffective…</code> read family answers "what is in force here?", which is exactly what enforcement applies and what a projection should render.</p>
+        </section>
+
+        <section id="projections">
+          <h2>Projection rules</h2>
+          <h3>Descriptive vs. prescriptive</h3>
+          <p>
+            <code>schemaForClass</code> and <code>toolSchemaForMethod</code> are siblings, not one function with
+            a flag. A descriptive schema <em>under-claims</em>: it describes values enforcement will accept. A
+            tool schema is <em>tight</em>: it specifies the object a producer must send.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Tool-schema decision</th><th>Why</th></tr></thead>
+              <tbody>
+                <tr><td>No <code>$schema</code></td><td>It's a <code>parameters</code> sub-schema, not a standalone document (DEC-049).</td></tr>
+                <tr><td><code>required</code> = has ≥1 constraint, minus <code>@Optional</code></td><td>Sound because predicates are total: a missing argument already fails at runtime (DEC-048, DEC-051).</td></tr>
+                <tr><td><code>additionalProperties: false</code></td><td>A method's parameter set is closed. It's the one keyword runtime enforcement doesn't itself check, and it's labeled honestly as producer-steering (DEC-048).</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Formats never over-claim</h3>
+          <p><code>@Uuid</code>, <code>@DateTime</code> and <code>@Ipv4</code> are validating descriptors whose predicate is at least as strict as the <code>format</code> keyword they emit. <code>date-time</code> uses strict RFC 3339 with real calendar validation, not <code>Date.parse</code>.</p>
+        </section>
+
+        <section id="strict">
+          <h2>OpenAI strict mode</h2>
+          <p>
+            Strict function calling requires every property to appear in <code>required</code> and
+            <code>additionalProperties: false</code> at <em>every</em> object level. <code>{providerStrict: true}</code>
+            applies that recursively, but strict mode forbids a truly absent property, so an optional field
+            has to become <strong>nullable in the declaration</strong>.
+          </p>
+          <figure class="code">
+            <div class="code-head"><span>nullability lives in the declaration</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+const parameters = toolSchemaFrom({
+    name: 'scheduleReminder',
+    params: {
+        patientId: StringContracts.Uuid(),
+        note: NullableContracts.Nullable(StringContracts.NotEmpty()), // ◆
+    },
+}, { providerStrict: true });
+// note → { type: ['string', 'null'], minLength: 1 }, and it is listed in `required`.
+// The model sends null; the same Nullable validator accepts it. No drift.
+</pre>
+          </figure>
+          <p>A bare non-nullable optional parameter, or an open <code>Dictionary</code> map, can't be expressed under strict mode. adorn refuses to build those with an actionable message instead of letting the API return a silent 400 (DEC-068, DEC-069, DEC-071).</p>
+        </section>
+
+        <section id="privacy">
+          <h2>Redaction &amp; privacy</h2>
+          <p>
+            Every path adorn can emit a value through, including <code>@Log</code>, violation messages and
+            observation events, renders <code>[REDACTED]</code> by default <strong>without reading any
+            annotation</strong>. <code>setValueDisclosure('all')</code> turns raw values back on for local
+            debugging, and a <code>@Sensitive</code> marking vetoes even that. The veto is surfaced, not
+            silenced.
+          </p>
+          <p>
+            <code>@Telemetry.value()</code>, <code>.redact(strategy)</code> and <code>.result()</code> opt a value
+            <em>into</em> disclosure on the observation path. <code>telemetryForClass</code> is the review
+            projection: a pure registry read reporting what each position is configured to disclose, with its
+            scanned denominator printed so a clean table is never mistaken for a clean bill of health.
+          </p>
+          <h3>The sensitive-flow detector</h3>
+          <p>
+            <code>adorn check</code> (also available as an ESLint rule) statically follows a <code>@Sensitive</code>
+            value through aliases, template interpolation and destructuring to adorn's own emitters. It is
+            report-only, permanently, and it states its limits on every run:
+            <code>s.ssn.slice(-4)</code> isn't caught, and a raw <code>console.log</code> of a sensitive value is
+            yours to handle (DEC-025, DEC-028).
+          </p>
+        </section>
+
+        <section id="observability">
+          <h2>The observability seam</h2>
+          <p>
+            A neutral, zero-dependency seam (DEC-035 to DEC-037). <code>setObservationSink</code> installs one
+            around-shaped <code>ObservationSink</code>. The enforcement weave emits value-free violation facts and
+            completions, and <code>@Observe</code> emits completions carrying pre-disclosed values, redacted by
+            default ("seeing ≠ emitting").
+          </p>
+          <ul>
+            <li><code>record</code> is the fire-and-forget point-event surface (<code>completed</code>, <code>violation</code>, <code>message</code>).</li>
+            <li><code>scope</code> opens a span, and its correlated <code>completed</code> event closes it, matched by <code>callId</code>.</li>
+            <li><code>nextCallId()</code> is the one shared id sequence, so your own emitter never collides with adorn's.</li>
+            <li><code>adorn/otel</code> maps only the public sink onto OpenTelemetry, so an event you emit by hand becomes a span too.</li>
+          </ul>
+        </section>
+
+        <section id="testing">
+          <h2>The testing projection</h2>
+          <p>
+            <code>adorn/test</code> derives <code>fast-check</code> generators from descriptors. Its rule is
+            <strong>sound generation</strong>: produce only inputs the contract accepts, or decline and say so
+            (DEC-031). Its oracle consumes the <em>same</em> functions enforcement runs
+            (<code>evaluatePreconditions</code>, <code>evaluatePostconditions</code>,
+            <code>evaluateEnabledness</code>), so it flags an input exactly when the enforced wrapper would throw
+            (DEC-034).
+          </p>
+          <p>
+            <code>fuzzSequence</code> extends this to stateful objects (DEC-090). A command is a method plus
+            generated arguments, and a sequence is an array of commands that fast-check shrinks structurally.
+            Enabledness is resolved at run time against the real instance, so <code>fc.commands</code> is
+            deliberately <em>not</em> used. It would force a parallel abstract model, which is exactly the drift
+            <code>@EnabledWhen</code> exists to prevent.
+          </p>
+          <div class="callout ok">
+            <strong>It samples. It doesn't prove.</strong>
+            <p>A clean run means no generated sequence broke an invariant or postcondition. The report states that boundary every time, and it warns that the real methods run, side effects included.</p>
+          </div>
+        </section>
+
+        <section id="boundaries">
+          <h2>Deliberate boundaries</h2>
+          <p>These are things adorn currently doesn't do, recorded as decisions rather than oversights.</p>
+          <div class="grid grid-2">
+            <div class="card"><h3>No TypeScript cross-check</h3><p><code>@GreaterThan(0) x: string</code> compiles. adorn removes drift <em>between projections</em>; it doesn't reconcile the descriptor with TypeScript's own view.</p></div>
+            <div class="card"><h3>Legacy decorators</h3><p>Parameter decorators exist only in legacy TypeScript. A Stage-3 adapter recording into the same core is on the roadmap (DEC-040).</p></div>
+            <div class="card"><h3>Closures stay closures</h3><p><code>@Requires</code>, <code>@Ensures</code> and <code>@EnabledWhen</code> carry no identity, so they're enforced and fuzzed but never projected.</p></div>
+            <div class="card"><h3>Names from <code>toString()</code></h3><p>Parameter names are recovered from source text, so minification degrades them, though enforcement and projections degrade together.</p></div>
+            <div class="card"><h3>No per-request policy</h3><p>Divergent enforcement per concurrent context isn't expressible today. Configuration is process-level.</p></div>
+            <div class="card"><h3>Add-ons stay out of core</h3><p>Resilience, limits, caching and policy decorators belong in separate packages, so the root stays dependent on <code>tslib</code> only (DEC-041, DEC-042).</p></div>
+          </div>
+          <div class="hero-actions">
+            <a class="button primary" href="reference.html">Use the reference</a>
+            <a class="button ghost" href="https://github.com/natwhite/adorn/tree/master/src">Read the source</a>
+          </div>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>adorn · contracts as data for TypeScript · MIT © <span data-year>2026</span> natwhite</span>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="index.html">Overview</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="reference.html">Reference</a>
+        <a href="https://github.com/natwhite/adorn/issues">Issues</a>
+        <a href="#main">Back to top</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+// Cloudflare Workers static-assets deployment for adorn-ts.dev. `npm run deploy` uploads public/ as-is.
+{
+  "name": "adorn-ts",
+  "compatibility_date": "2026-10-12",
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page"
+  },
+  // Wrangler attaches these as custom domains (DNS record + certificate managed by Cloudflare).
+  "routes": [
+    { "pattern": "adorn-ts.dev", "custom_domain": true },
+    { "pattern": "www.adorn-ts.dev", "custom_domain": true }
+  ]
+}

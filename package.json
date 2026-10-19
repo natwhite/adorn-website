@@ -1,0 +1,18 @@
+{
+  "name": "adorn-website",
+  "version": "0.0.0",
+  "description": "Website for adorn (adorn-ts.dev): static, no build step.",
+  "scripts": {
+    "bundle": "node scripts/bundle-adorn.mjs",
+    "snippets": "node scripts/run-snippets.mjs",
+    "check": "node scripts/check-reference.mjs",
+    "serve": "npx --yes serve@14 public",
+    "deploy": "npm run check && npx --yes wrangler@4 deploy"
+  },
+  "author": "natwhite",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.24.2"
+  },
+  "private": true
+}

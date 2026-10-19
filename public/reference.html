@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>adorn Reference | Guide and API</title>
+  <meta name="description" content="Getting started with adorn, the full constraint vocabulary, projections, configuration, CLI, add-ons, and a searchable index of the public surface.">
+  <meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#131219" media="(prefers-color-scheme: dark)">
+  <link rel="canonical" href="https://adorn-ts.dev/reference.html">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <script>try{var t=localStorage.getItem('adorn-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html" aria-label="adorn home">
+        <img class="logo-mark" src="assets/logo.svg" alt="" width="32" height="32">
+        adorn <span class="logo-version">0.1</span>
+      </a>
+      <nav class="site-nav" id="siteNav" aria-label="Site">
+        <a href="index.html">Overview</a>
+        <a href="index.html#playground">Playground</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="reference.html" aria-current="page">Reference</a>
+      </nav>
+      <div class="header-actions">
+        <button class="icon-button" type="button" data-theme-toggle aria-label="Toggle theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <a class="icon-button" href="https://github.com/natwhite/adorn" aria-label="adorn on GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0C17.3 4.8 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5z"/></svg>
+        </a>
+        <button class="icon-button menu-toggle" type="button" aria-expanded="false" aria-controls="siteNav" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="doc-hero">
+      <div class="container">
+        <p class="eyebrow">Reference</p>
+        <h1>Guide and API</h1>
+        <p class="lede">This page covers installing adorn, the full constraint vocabulary, what each projection emits, the knobs, the CLI and the add-ons. At the end is a searchable index of every runtime export.</p>
+      </div>
+    </div>
+
+    <div class="container doc-layout">
+      <nav class="toc" aria-label="Contents">
+        <p>Contents</p>
+        <ol>
+          <li><a href="#getting-started">Getting started</a></li>
+          <li><a href="#constraints">Parameter constraints</a></li>
+          <li><a href="#composition">Composition</a></li>
+          <li><a href="#markers">Markers</a></li>
+          <li><a href="#conditions">Pre/postconditions</a></li>
+          <li><a href="#fields">Field contracts</a></li>
+          <li><a href="#values">Working with values</a></li>
+          <li><a href="#projections">Projections</a></li>
+          <li><a href="#config">Configuration</a></li>
+          <li><a href="#privacy">Privacy</a></li>
+          <li><a href="#cli">CLI</a></li>
+          <li><a href="#addons">Add-ons</a></li>
+          <li><a href="#gotchas">Gotchas</a></li>
+          <li><a href="#index">API index</a></li>
+        </ol>
+      </nav>
+
+      <article class="doc">
+        <section id="getting-started">
+          <h2>Getting started</h2>
+          <h3>1 · Install</h3>
+          <figure class="code"><div class="code-head"><span>terminal</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="bash">
+npm i adorn
+</pre></figure>
+          <p>The only runtime dependency is <code>tslib</code>. It ships CommonJS with <code>.d.ts</code> types and supports Node.js 20.19 and later (CI runs 20.19, 22 and 24).</p>
+
+          <h3>2 · Enable decorators</h3>
+          <figure class="code"><div class="code-head"><span>tsconfig.json</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="json">
+{ "compilerOptions": { "experimentalDecorators": true, "emitDecoratorMetadata": true } }
+</pre></figure>
+          <p><code>reflect-metadata</code> is <strong>not</strong> required. Without it, the generated docs just lose their <code>Type</code> column. The decorator path needs a metadata-emitting compiler (<code>tsc</code>, ts-node, ts-jest), and esbuild, SWC, Vite and Bun don't emit that metadata. The descriptor-first path (<code>Verify</code>, <code>contract()</code>, <code>toolSchemaFrom</code>) works with no flags at all.</p>
+
+          <h3>3 · Contract a tool</h3>
+          <figure class="code"><div class="code-head"><span>weather.ts</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+import {
+    Contract, Tool, Describe, NotEmpty, OneOf,
+    GreaterThanEqual, LessThanEqual, toolSchemaForMethod,
+} from 'adorn';
+
+@Contract()
+export class WeatherTool {
+    @Tool('Look up a weather forecast.')
+    getWeather(
+        @Describe('the city to look up') @NotEmpty() location: string,
+        @OneOf(['celsius', 'fahrenheit']) unit: string,
+        @GreaterThanEqual(1) @LessThanEqual(7) days: number,
+    ): string {
+        return `${days}-day forecast for ${location} in ${unit}`;
+    }
+}
+
+// Hand this to any function-calling API as the tool's `parameters`:
+export const parameters = toolSchemaForMethod(WeatherTool, 'getWeather');
+</pre></figure>
+
+          <h3>4 · Route the model's call through it</h3>
+          <figure class="code"><div class="code-head"><span>agent.ts</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+const tool = new WeatherTool();
+const args = JSON.parse(toolCall.function.arguments);
+
+try {
+    return tool.getWeather(args.location, args.unit, args.days);
+} catch (e) {
+    // A contract violation: hand the message back to the model so it can retry.
+    return `error: ${(e as Error).message}`;
+}
+</pre></figure>
+          <div class="callout">
+            <strong>Prefer a value to an exception?</strong>
+            <p>Validate the parsed arguments first with <code>Verify.check(ObjectContracts.Fields({...}), 'args', args)</code>, which returns <code>{ok, value}</code> or <code>{ok: false, path, expected, message}</code>. See <a href="#values">Working with values</a>.</p>
+          </div>
+        </section>
+
+        <section id="constraints">
+          <h2>Parameter constraints</h2>
+          <p>Each one is a decorator for a parameter (<code>@Between(1, 10)</code>) and a descriptor in a namespace (<code>NumberContracts.Between(1, 10)</code>). Every predicate is total: a wrong-type value is a violation, never a <code>TypeError</code>.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Decorator</th><th>Accepts</th><th>Schema</th></tr></thead>
+              <tbody>
+                <tr><td><code>@GreaterThan(n)</code> / <code>@GreaterThanEqual(n)</code></td><td>number &gt; n / ≥ n</td><td><code>exclusiveMinimum</code> / <code>minimum</code></td></tr>
+                <tr><td><code>@LessThan(n)</code> / <code>@LessThanEqual(n)</code></td><td>number &lt; n / ≤ n</td><td><code>exclusiveMaximum</code> / <code>maximum</code></td></tr>
+                <tr><td><code>@Between(a, b)</code></td><td>a ≤ number ≤ b</td><td><code>minimum</code> + <code>maximum</code></td></tr>
+                <tr><td><code>@Integer()</code> · <code>@MultipleOf(n)</code></td><td>whole number · divisible by n</td><td><code>type: integer</code> · <code>multipleOf</code></td></tr>
+                <tr><td><code>@MinLength(n)</code> · <code>@MaxLength(n)</code> · <code>@StringMinLength(n)</code></td><td>length bounds</td><td><code>minLength</code> · <code>maxLength</code></td></tr>
+                <tr><td><code>@NotEmpty()</code></td><td>a non-empty string</td><td><code>minLength: 1</code></td></tr>
+                <tr><td><code>@Matches(pattern, flags?)</code></td><td>matches the pattern</td><td><code>pattern</code></td></tr>
+                <tr><td><code>@Email()</code> · <code>@Url()</code></td><td>email · URL</td><td><code>pattern</code> · <code>format: uri</code></td></tr>
+                <tr><td><code>@Uuid()</code> · <code>@DateTime()</code> · <code>@Ipv4()</code> · <code>@Format(name)</code></td><td>validating formats; date-time is strict RFC 3339</td><td><code>format</code></td></tr>
+                <tr><td><code>@OneOf([...])</code></td><td>strict <code>===</code> membership</td><td><code>enum</code></td></tr>
+                <tr><td><code>@Const(v)</code></td><td>exactly <code>v</code></td><td><code>const</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Stacked decorators conjoin and evaluate top to bottom. <code>@Positive()</code> and friends were removed on purpose, because a name can't carry a boundary. Write <code>@GreaterThan(0)</code>.</p>
+        </section>
+
+        <section id="composition">
+          <h2>Composition</h2>
+          <figure class="code"><div class="code-head"><span>nested shapes, as data</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+const member = ObjectContracts.Fields({
+    name: StringContracts.NotEmpty(),
+    roles: ArrayContracts.ArrayOf(EnumContracts.OneOf(['admin', 'editor', 'viewer']), { minItems: 1 }),
+    note: NullableContracts.Nullable(StringContracts.NotEmpty()),
+});
+
+Verify.check(member, 'member', { name: 'Ada', roles: ['admin', 'wizard'], note: null });
+// { ok: false, path: ['roles', 1], expected: 'one of "admin", "editor", "viewer"', … }
+</pre></figure>
+          <ul>
+            <li><code>@ArrayOf(item, {minItems?, maxItems?})</code>: every element satisfies <code>item</code>. A failure names the element's index.</li>
+            <li><code>@Dictionary(value)</code>: an <strong>open</strong> map of string keys to values matching <code>value</code>.</li>
+            <li><code>@Shape(FieldClass)</code>: a <strong>closed</strong> DTO validated against another class's contracted fields.</li>
+            <li><code>ObjectContracts.Fields({...})</code>: an optional-aware object literal, with no class needed.</li>
+            <li><code>@Nullable(item)</code>: also accepts <code>null</code>. This is different from <code>@Optional</code>, which means the value may be absent.</li>
+          </ul>
+        </section>
+
+        <section id="markers">
+          <h2>Markers</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Marker</th><th>Effect</th></tr></thead>
+              <tbody>
+                <tr><td><code>@Optional()</code></td><td>An absent argument is fine, and the parameter is dropped from the tool schema's <code>required</code>. If any inheritance level requires it, it stays required.</td></tr>
+                <tr><td><code>@Default(v)</code></td><td>Publishes <code>{default: v}</code> into the schema and implies <code>@Optional</code>. It does <strong>not</strong> inject the value; the host applies it.</td></tr>
+                <tr><td><code>@Describe('…')</code></td><td>The property's <code>description</code>, which the model reads.</td></tr>
+                <tr><td><code>@Tool('…')</code></td><td>The tool's top-level <code>description</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="conditions">
+          <h2>Pre- and postconditions</h2>
+          <figure class="code"><div class="code-head"><span>bank.ts</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+@Contract()
+class Bank {
+    @Requires((amount: number, balance: number) =&gt; amount &lt;= balance, 'cannot overdraw')
+    @Returns(NumberContracts.GreaterThanEqual(0))
+    @Ensures((result: unknown, amount: number, balance: number) =&gt;
+        (result as number) === balance - amount, 'balance drops by exactly the amount')
+    withdraw(@GreaterThanEqual(1) amount: number, @GreaterThanEqual(0) balance: number): number {
+        return balance - amount;
+    }
+}
+
+new Bank().withdraw(30, 100);   // 70
+new Bank().withdraw(150, 100);  // throws @Requires (caller overdrew)
+new Bank().withdraw(0, 100);    // throws @GreaterThanEqual(1) on `amount`
+</pre></figure>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Decorator</th><th>When</th><th>Blames</th><th>Projects</th></tr></thead>
+              <tbody>
+                <tr><td><code>@EnabledWhen((self, ...args) =&gt; bool)</code></td><td>before, reads state</td><td>caller</td><td>no</td></tr>
+                <tr><td><code>@Requires((...args) =&gt; bool)</code></td><td>before</td><td>caller</td><td>no</td></tr>
+                <tr><td><code>@Returns(descriptor)</code></td><td>after, on the settled value</td><td>callee</td><td>yes</td></tr>
+                <tr><td><code>@Ensures((result, ...args) =&gt; bool)</code></td><td>after, on the settled value</td><td>callee</td><td>no</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>All four stack on one signature. A guard that <em>returns</em> <code>false</code> means "not enabled"; a guard that <em>throws</em> is treated as a defect in the guard itself and propagates unchanged.</p>
+        </section>
+
+        <section id="fields">
+          <h2>Field contracts</h2>
+          <figure class="code"><div class="code-head"><span>account.ts</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+@Contract()
+class Account {
+    @Enforce.greaterThanEqual(0) balance = 0;   // validated on every assignment
+    @Enforce.notEmpty() owner = 'unknown';
+}
+</pre></figure>
+          <p><code>Enforce</code> has a method for every constraint (<code>greaterThan</code>, <code>between</code>, <code>oneOf</code>, <code>uuid</code>, <code>arrayOf</code>, <code>shape</code>, <code>nullable</code> and so on). <code>CreateFieldDecorator(descriptor)</code> wraps any descriptor, including your own. Field contracts are inherited: a subclass can strengthen them but never weaken them.</p>
+        </section>
+
+        <section id="values">
+          <h2>Working with values</h2>
+          <p>Use these when there's no signature to decorate. They take the same descriptors and run the same oracles, as functions.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Function</th><th>Use it for</th></tr></thead>
+              <tbody>
+                <tr><td><code>Verify.check(d, name, value)</code></td><td>Untrusted input as a value, such as an HTTP 400. Narrows <code>unknown</code> and reports <code>path</code> and <code>expected</code>.</td></tr>
+                <tr><td><code>Verify.that(d, name, value)</code></td><td>The same check, but it throws, returning the narrowed value on success.</td></tr>
+                <tr><td><code>toolSchemaFrom({name, description, params}, opts)</code></td><td>Tool schemas whose permitted values are known only at runtime.</td></tr>
+                <tr><td><code>contract(spec, fn)</code></td><td>Enforcing params, requires, ensures and returns on a plain function, sync or async.</td></tr>
+                <tr><td><code>violationFromCheck(result)</code></td><td>Emitting a functional refusal on the observation stream.</td></tr>
+                <tr><td><code>defineConstraint({...})</code></td><td>Your own first-class constraint, which projects like a built-in.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <figure class="code"><div class="code-head"><span>per-session tool</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+const params = {
+    slotId: EnumContracts.OneOf(availableSlots),  // known only now
+    partySize: NumberContracts.Between(1, 8),
+};
+const schema = toolSchemaFrom({ name: 'book', params }, { providerStrict: true });
+const reply = Verify.check(ObjectContracts.Fields(params), 'args', modelArgs);
+</pre></figure>
+          <p>To try this live, use the <a href="index.html#playground">playground</a>.</p>
+        </section>
+
+        <section id="projections">
+          <h2>Projections</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Projection</th><th>One class</th><th>Whole registry</th></tr></thead>
+              <tbody>
+                <tr><td>LLM tool schema (prescriptive)</td><td><code>toolSchemaForMethod(Cls, 'm', {providerStrict?})</code></td><td>n/a</td></tr>
+                <tr><td>JSON Schema 2020-12 (descriptive)</td><td><code>schemaForClass(Cls)</code></td><td><code>generateSchema()</code></td></tr>
+                <tr><td>Markdown docs</td><td><code>renderMarkdown([documentClass(Cls)])</code></td><td><code>generateMarkdown()</code></td></tr>
+                <tr><td>Privacy review</td><td><code>serializeTelemetry(telemetryForClass(Cls))</code></td><td><code>generateTelemetryReport()</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The model types (<code>ClassDoc</code>, <code>MethodDoc</code>, <code>ToolSchema</code>, <code>TelemetryReport</code> and so on) are exported so you can type variables that hold them.</p>
+        </section>
+
+        <section id="config">
+          <h2>Configuration</h2>
+          <p>Set these once at startup. They're process-level, not per-request.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Call</th><th>Effect</th></tr></thead>
+              <tbody>
+                <tr><td><code>setViolationPolicy('throw' | 'warn' | handler)</code></td><td><code>'warn'</code> proceeds into the method. Use it to stage a new contract over live traffic.</td></tr>
+                <tr><td><code>setEnforcementMode('development' | 'production' | 'auto')</code></td><td>Production strips <code>assert</code>-trust contracts. <code>guard</code> contracts stay on.</td></tr>
+                <tr><td><code>setDefaultTrust('guard' | 'assert')</code></td><td>The default for contracts that don't declare one.</td></tr>
+                <tr><td><code>disableGuardEnforcement({confirm, reason})</code></td><td>The only way to strip guard contracts.</td></tr>
+                <tr><td><code>setValueDisclosure('none' | 'all')</code></td><td>Shows raw values in adorn's own output, for local debugging only.</td></tr>
+                <tr><td><code>setContractDiagnosticsEnabled(bool)</code></td><td>Dev-mode warnings, such as constraints declared without <code>@Contract()</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="privacy">
+          <h2>Privacy</h2>
+          <p>Redaction is on by default and needs no annotation. <code>@Sensitive()</code> on a field, parameter or class vetoes disclosure even under <code>setValueDisclosure('all')</code>. <code>@Telemetry.value()</code>, <code>.redact(strategy)</code> and <code>.result()</code> opt values into the observation path.</p>
+          <div class="callout warn">
+            <strong>A permanent gap</strong>
+            <p><code>transfer(ssn: string)</code> has to be marked on the parameter itself. JavaScript's value semantics break the link back to a <code>@Sensitive</code> field once the primitive is passed.</p>
+          </div>
+        </section>
+
+        <section id="cli">
+          <h2>CLI</h2>
+          <figure class="code"><div class="code-head"><span>terminal</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="bash">
+adorn docs   --out CONTRACTS.md src/tools/*.ts   # Markdown documentation
+adorn schema --out schema.json  src/tools/*.ts   # JSON Schema (draft 2020-12)
+adorn check  tsconfig.json                       # @Sensitive values reaching an adorn emitter
+</pre></figure>
+          <p><code>docs</code> and <code>schema</code> <strong>load, then project</strong>: they <code>require</code> each entry so its decorators run, which means importing executes the module, side effects included. <code>.ts</code> entries need <code>ts-node</code> and <code>typescript</code> in your project. <code>check</code> is static: it never runs your code, and it exits non-zero if it finds a leak.</p>
+        </section>
+
+        <section id="addons">
+          <h2>Add-ons</h2>
+          <p>Both ship inside the package as subpath exports. Importing the root never loads them, and each one needs its peer dependency only when you use it.</p>
+          <div class="grid grid-2">
+            <div class="card">
+              <h3><code>adorn/test</code></h3>
+              <p>Needs <code>fast-check</code>. <code>fuzzMethod</code>, <code>fuzzClass</code> and <code>fuzzFunction</code> (each with an async variant) test one unit against its own contract. <code>fuzzSequence</code> tests call sequences on stateful objects.</p>
+              <figure class="code"><pre data-lang="bash">
+npm i -D fast-check
+</pre></figure>
+            </div>
+            <div class="card">
+              <h3><code>adorn/otel</code></h3>
+              <p>Needs <code>@opentelemetry/api</code>. <code>createOtelSink()</code> turns the observation stream into spans, a duration histogram and value-free violation events.</p>
+              <figure class="code"><pre data-lang="ts">
+setObservationSink(createOtelSink());
+</pre></figure>
+            </div>
+          </div>
+        </section>
+
+        <section id="gotchas">
+          <h2>Gotchas</h2>
+          <ul>
+            <li><strong><code>@Contract()</code> is required.</strong> Without it, constraints are neither enforced nor projected. adorn warns in development.</li>
+            <li><strong>Decorator order with <code>@Validate()</code>.</strong> Method decorators it should see must sit <em>below</em> it. Class-level <code>@Contract()</code> doesn't care about order.</li>
+            <li><strong>TypeScript defaults are honored.</strong> <code>f(@GreaterThanEqual(1000) t = 30_000)</code> called as <code>f()</code> uses the default. <code>@Default</code> exists to publish a default to the schema.</li>
+            <li><strong>A TypeScript default and <code>@Default</code> can disagree.</strong> <code>@Default(10) x = 20</code> publishes 10 and runs with 20. adorn doesn't reconcile the descriptor with TypeScript.</li>
+            <li><strong>No constructor-parameter decorators yet.</strong> Use a <code>@Validate()</code>-decorated <code>static of(...)</code> factory with a private constructor.</li>
+            <li><strong><code>static #private</code> blocks class decorators</strong> (TS18036). Move it to module scope.</li>
+            <li><strong><code>@NotEmpty()</code> accepts whitespace.</strong> Pair it with <code>@Matches(/\S/)</code> when blank input should fail.</li>
+            <li><strong>A wrapped method reports <code>length === 0</code>.</strong> Its <code>.name</code> is correct, and <code>contract()</code> preserves <code>length</code>.</li>
+          </ul>
+        </section>
+
+        <section id="index">
+          <h2>API index</h2>
+          <p>Every runtime export of <code>adorn</code>, <code>adorn/test</code> and <code>adorn/otel</code>. The site's build check fails if this list drifts from the library. Press <kbd>/</kbd> to search.</p>
+          <div class="ref-controls">
+            <input id="refSearch" class="ref-search" type="search" placeholder="Search names, signatures, descriptions…" aria-label="Search the API index">
+            <span id="refCount" class="ref-count" aria-live="polite"></span>
+          </div>
+          <div id="refCats" class="ref-cats" role="group" aria-label="Filter by category"></div>
+          <ul id="refList" class="ref-list"></ul>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>adorn · contracts as data for TypeScript · MIT © <span data-year>2026</span> natwhite</span>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="index.html">Overview</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="reference.html">Reference</a>
+        <a href="https://github.com/natwhite/adorn/issues">Issues</a>
+        <a href="#main">Back to top</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="reference-data.js"></script>
+  <script src="reference.js"></script>
+</body>
+</html>
