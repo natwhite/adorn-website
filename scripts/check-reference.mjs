@@ -1,5 +1,6 @@
 // Fails if the site's API index (public/reference-data.js) drifts from the library: every runtime export
-// of adorn, adorn/test and adorn/otel must have exactly one entry, and no entry may name a non-export.
+// of adorn, adorn/schema, adorn/introspection, adorn/observe, adorn/privacy, adorn/test and adorn/otel
+// must have exactly one entry, and no entry may name a non-export.
 // It also fails if the bundled playground build is from a different adorn version than ../adorn.
 //
 //   npm run check
@@ -15,6 +16,10 @@ const require = createRequire(resolve(adornDir, 'package.json'));
 
 const modules = {
     adorn: require(resolve(adornDir, 'dist/index.js')),
+    'adorn/schema': require(resolve(adornDir, 'dist/schema.js')),
+    'adorn/introspection': require(resolve(adornDir, 'dist/introspection.js')),
+    'adorn/observe': require(resolve(adornDir, 'dist/observe.js')),
+    'adorn/privacy': require(resolve(adornDir, 'dist/privacy.js')),
     'adorn/test': require(resolve(adornDir, 'dist/addons/test/index.js')),
     'adorn/otel': require(resolve(adornDir, 'dist/addons/otel/index.js')),
 };

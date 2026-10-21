@@ -96,8 +96,9 @@ npm i adorn
 <pre data-lang="ts">
 import {
     Contract, Tool, Describe, NotEmpty, OneOf,
-    GreaterThanEqual, LessThanEqual, toolSchemaForMethod,
+    GreaterThanEqual, LessThanEqual,
 } from 'adorn';
+import { toolSchemaForMethod } from 'adorn/schema';
 
 @Contract()
 export class WeatherTool {
@@ -137,6 +138,7 @@ try {
         <section id="constraints">
           <h2>Parameter constraints</h2>
           <p>Each one is a decorator for a parameter (<code>@Between(1, 10)</code>) and a descriptor in a namespace (<code>NumberContracts.Between(1, 10)</code>). Every predicate is total: a wrong-type value is a violation, never a <code>TypeError</code>.</p>
+          <p>The descriptor namespaces are also exposed through one fluent facade, <code>Contracts</code>, grouped by the type they constrain: <code>Contracts.number.between(1, 10)</code>, <code>Contracts.string.uuid()</code>, <code>Contracts.enum(['celsius', 'fahrenheit'])</code>, <code>Contracts.nullable(Contracts.number.finite())</code>. It is the same factories under one entry point — a second spelling, not a second implementation — usable anywhere a descriptor is.</p>
           <div class="table-wrap">
             <table>
               <thead><tr><th>Decorator</th><th>Accepts</th><th>Schema</th></tr></thead>
@@ -263,7 +265,7 @@ const params = {
     slotId: EnumContracts.OneOf(availableSlots),  // known only now
     partySize: NumberContracts.Between(1, 8),
 };
-const schema = toolSchemaFrom({ name: 'book', params }, { providerStrict: true });
+const schema = toolSchemaFrom({ name: 'book', params }, { provider: 'openai', strict: true });
 const reply = Verify.check(ObjectContracts.Fields(params), 'args', modelArgs);
 </pre></figure>
           <p>To try this live, use the <a href="index.html#playground">playground</a>.</p>
@@ -275,7 +277,7 @@ const reply = Verify.check(ObjectContracts.Fields(params), 'args', modelArgs);
             <table>
               <thead><tr><th>Projection</th><th>One class</th><th>Whole registry</th></tr></thead>
               <tbody>
-                <tr><td>LLM tool schema (prescriptive)</td><td><code>toolSchemaForMethod(Cls, 'm', {providerStrict?})</code></td><td>n/a</td></tr>
+                <tr><td>LLM tool schema (prescriptive)</td><td><code>toolSchemaForMethod(Cls, 'm', {provider?, strict?})</code></td><td>n/a</td></tr>
                 <tr><td>JSON Schema 2020-12 (descriptive)</td><td><code>schemaForClass(Cls)</code></td><td><code>generateSchema()</code></td></tr>
                 <tr><td>Markdown docs</td><td><code>renderMarkdown([documentClass(Cls)])</code></td><td><code>generateMarkdown()</code></td></tr>
                 <tr><td>Privacy review</td><td><code>serializeTelemetry(telemetryForClass(Cls))</code></td><td><code>generateTelemetryReport()</code></td></tr>

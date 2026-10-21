@@ -229,7 +229,7 @@ _Look up a weather forecast._
 
         <div class="projections">
           <article class="card projection reveal"><span class="where">core</span><h3>Runtime validation</h3><p>Runs on every call. A <code>guard</code> contract is kept in production; an <code>assert</code> is an internal self-check that's stripped there.</p></article>
-          <article class="card projection reveal"><span class="where">core</span><h3>LLM tool schema</h3><p><code>toolSchemaForMethod</code> produces the exact <code>parameters</code> object a function-calling API wants, with OpenAI strict mode via <code>{providerStrict: true}</code>.</p></article>
+          <article class="card projection reveal"><span class="where">core</span><h3>LLM tool schema</h3><p><code>toolSchemaForMethod</code> produces the exact <code>parameters</code> object a function-calling API wants, with OpenAI strict mode via <code>{provider: 'openai', strict: true}</code>.</p></article>
           <article class="card projection reveal"><span class="where">core</span><h3>JSON Schema 2020-12</h3><p><code>schemaForClass</code> describes what enforcement will accept. When unsure it falls back to the weaker true statement, because an over-claiming schema is worse than none.</p></article>
           <article class="card projection reveal"><span class="where">core</span><h3>Documentation</h3><p>Markdown generated from the same statement that's enforced: <code>documentClass</code> → <code>renderMarkdown</code>, or <code>adorn docs</code> from the CLI.</p></article>
           <article class="card projection reveal"><span class="where">core</span><h3>Observability</h3><p>A neutral, zero-dependency sink receives value-free violation and completion facts. <code>adorn/otel</code> maps them onto OpenTelemetry.</p></article>
@@ -256,7 +256,7 @@ _Look up a weather forecast._
           <label>Example
             <select id="pgExample" aria-label="Choose an example"></select>
           </label>
-          <label class="switch"><input type="checkbox" id="pgStrict"> OpenAI strict mode (<code>providerStrict</code>)</label>
+          <label class="switch"><input type="checkbox" id="pgStrict"> OpenAI strict mode</label>
         </div>
 
         <div class="playground">
@@ -308,7 +308,7 @@ _Look up a weather forecast._
           <table>
             <thead><tr><th>Case</th><th>HTTP</th><th>Schema accepted</th><th>Args valid</th><th>Verdict</th></tr></thead>
             <tbody>
-              <tr class="evidence-row"><td><strong>reminder</strong>: <code>providerStrict</code> + a <code>Nullable</code> optional field</td><td>200</td><td>yes</td><td>yes</td><td><span class="pill ok">ROUND-TRIP OK</span></td></tr>
+              <tr class="evidence-row"><td><strong>reminder</strong>: OpenAI strict mode + a <code>Nullable</code> optional field</td><td>200</td><td>yes</td><td>yes</td><td><span class="pill ok">ROUND-TRIP OK</span></td></tr>
               <tr class="evidence-row"><td><strong>book</strong>: a <code>Fields</code> param with an optional field (non-strict)</td><td>200</td><td>yes</td><td>yes</td><td><span class="pill ok">ROUND-TRIP OK</span></td></tr>
               <tr class="evidence-row"><td><strong>bookStrict</strong>: a <code>Fields</code> param, all fields required (strict)</td><td>200</td><td>yes</td><td>yes</td><td><span class="pill ok">ROUND-TRIP OK</span></td></tr>
               <tr class="evidence-row"><td><strong>bookStrictOpt</strong>: a nested nullable optional field (strict)</td><td>200</td><td>yes</td><td>yes</td><td><span class="pill ok">ROUND-TRIP OK</span></td></tr>
@@ -322,7 +322,7 @@ _Look up a weather forecast._
           </div>
           <div class="card reveal">
             <h3>Refused at build time, not by a 400</h3>
-            <p>Strict mode can't express a truly optional property, so a bare non-nullable <code>@Optional</code> under <code>providerStrict</code> fails at build time with an actionable message. Without that, OpenAI would just reject the request.</p>
+            <p>Strict mode can't express a truly optional property, so a bare non-nullable <code>@Optional</code> under OpenAI strict mode fails at build time with an actionable message. Without that, OpenAI would just reject the request.</p>
           </div>
         </div>
         <p class="pg-note">The verbatim schemas and method are in <a href="https://github.com/natwhite/adorn/blob/master/docs/q31-capstone-results.md">docs/q31-capstone-results.md</a>.</p>

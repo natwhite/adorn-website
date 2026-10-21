@@ -86,14 +86,14 @@
           <h2>Design rules</h2>
           <p>Five rules constrain every implementation choice. Most of the decision log is these rules being applied to a specific case.</p>
           <div class="grid grid-2">
-            <div class="card"><h3>One descriptor, many readers</h3><p>Enforcement, docs, schemas, telemetry and fuzzers read the same recorded data. No projection is allowed its own copy of a constraint (DEC-006, DEC-010).</p></div>
-            <div class="card"><h3>Degrade toward the weaker truth</h3><p>When a projection can't express something exactly, it says less, never more. An over-claiming schema is worse than none (DEC-029).</p></div>
+            <div class="card"><h3>One descriptor, many readers</h3><p>Enforcement, docs, schemas, telemetry and fuzzers read the same recorded data. No projection is allowed its own copy of a constraint.</p></div>
+            <div class="card"><h3>Degrade toward the weaker truth</h3><p>When a projection can't express something exactly, it says less, never more. An over-claiming schema is worse than none.</p></div>
             <div class="card"><h3>Validate, never coerce</h3><p>adorn rejects an invalid value. It never silently converts, defaults or transforms it, so a malformed argument is always a violation.</p></div>
-            <div class="card"><h3>Safe by default</h3><p>Every path adorn emits through redacts values without reading any annotation. Disclosure is opt-in, and <code>@Sensitive</code> vetoes it (DEC-030).</p></div>
+            <div class="card"><h3>Safe by default</h3><p>Every path adorn emits through redacts values without reading any annotation. Disclosure is opt-in, and <code>@Sensitive</code> vetoes it.</p></div>
           </div>
           <div class="callout">
             <strong>Frozen reads, private writes</strong>
-            <p>The registry's read surface (<code>getContracts</code>, <code>getEffective…</code>) is semver-frozen public API. Its writers are deliberately not exported, because they would bypass the adapter that owns ordering and installation (DEC-039).</p>
+            <p>The registry's read surface (<code>getContracts</code>, <code>getEffective…</code>) is semver-frozen public API. Its writers are deliberately not exported, because they would bypass the adapter that owns ordering and installation.</p>
           </div>
         </section>
 
@@ -121,9 +121,9 @@
           </div>
           <div class="callout warn">
             <strong><code>@Contract()</code> is required</strong>
-            <p>Parameter constraints do nothing on their own. A class that declares them without <code>@Contract()</code> isn't enforced and is invisible to every projection. Because that failure is silent, adorn emits a development-mode warning naming the class and methods. <code>@Validate()</code> is the per-method alternative, but class-level <code>@Contract()</code> installs outermost, so guard-before-flow holds by construction (DEC-043).</p>
+            <p>Parameter constraints do nothing on their own. A class that declares them without <code>@Contract()</code> isn't enforced and is invisible to every projection. Because that failure is silent, adorn emits a development-mode warning naming the class and methods. <code>@Validate()</code> is the per-method alternative, but class-level <code>@Contract()</code> installs outermost, so guard-before-flow holds by construction.</p>
           </div>
-          <p>Constraints evaluate in declaration order: parameters left to right, stacked decorators top to bottom. When several arguments are invalid, the first one in the signature is the one reported (DEC-015, DEC-017).</p>
+          <p>Constraints evaluate in declaration order: parameters left to right, stacked decorators top to bottom. When several arguments are invalid, the first one in the signature is the one reported.</p>
         </section>
 
         <section id="descriptors">
@@ -137,7 +137,8 @@
           <figure class="code">
             <div class="code-head"><span>a custom constraint is first-class</span><button class="copy" type="button">copy</button></div>
 <pre data-lang="ts">
-import { defineConstraint, Verify, toolSchemaFrom, type JsonObject } from 'adorn';
+import { defineConstraint, Verify, type JsonObject } from 'adorn';
+import { toolSchemaFrom } from 'adorn/schema';
 
 const even = defineConstraint&lt;JsonObject, number&gt;({
     kind: 'number',
@@ -188,14 +189,14 @@ toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', mu
             alone they behave the same, but they mean opposite things downstream. A failed
             <code>@Requires</code> means "these arguments are never valid", which is a generation signal that
             shapes an input schema. A failed <code>@EnabledWhen</code> means "correctly not enabled in this
-            state", an expected skip that no choice of arguments could satisfy (DEC-089).
+            state", an expected skip that no choice of arguments could satisfy.
           </p>
           <p>The postcondition bands run on the <em>settled</em> value. adorn's shared <code>settle</code> classifier handles sync returns, thenables and observable-like values, so an async method's contract is checked against what it resolves to.</p>
         </section>
 
         <section id="trust">
           <h2>Trust &amp; enforcement</h2>
-          <p>Each contract is classified by trust (DEC-008):</p>
+          <p>Each contract is classified by trust:</p>
           <ul>
             <li><strong><code>guard</code></strong> (the default) validates untrusted input and stays on in production. Only <code>disableGuardEnforcement({confirm, reason})</code> strips it.</li>
             <li><strong><code>assert</code></strong> is an internal self-check that's stripped in production.</li>
@@ -215,7 +216,7 @@ toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', mu
           <h2>Inheritance: strengthen, never weaken</h2>
           <p>
             A subclass's field is checked against the union of every declaration on its prototype chain, and an
-            overridden method inherits its parent's preconditions (DEC-021, DEC-022). A subclass can add
+            overridden method inherits its parent's preconditions. A subclass can add
             constraints but can't remove one. <code>@Optional</code> follows <strong>required-wins</strong>: if
             any level requires a parameter, it's required.
           </p>
@@ -234,9 +235,9 @@ toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', mu
             <table>
               <thead><tr><th>Tool-schema decision</th><th>Why</th></tr></thead>
               <tbody>
-                <tr><td>No <code>$schema</code></td><td>It's a <code>parameters</code> sub-schema, not a standalone document (DEC-049).</td></tr>
-                <tr><td><code>required</code> = has ≥1 constraint, minus <code>@Optional</code></td><td>Sound because predicates are total: a missing argument already fails at runtime (DEC-048, DEC-051).</td></tr>
-                <tr><td><code>additionalProperties: false</code></td><td>A method's parameter set is closed. It's the one keyword runtime enforcement doesn't itself check, and it's labeled honestly as producer-steering (DEC-048).</td></tr>
+                <tr><td>No <code>$schema</code></td><td>It's a <code>parameters</code> sub-schema, not a standalone document.</td></tr>
+                <tr><td><code>required</code> = has ≥1 constraint, minus <code>@Optional</code></td><td>Sound because predicates are total: a missing argument already fails at runtime.</td></tr>
+                <tr><td><code>additionalProperties: false</code></td><td>A method's parameter set is closed. It's the one keyword runtime enforcement doesn't itself check, and it's labeled honestly as producer-steering.</td></tr>
               </tbody>
             </table>
           </div>
@@ -248,7 +249,7 @@ toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', mu
           <h2>OpenAI strict mode</h2>
           <p>
             Strict function calling requires every property to appear in <code>required</code> and
-            <code>additionalProperties: false</code> at <em>every</em> object level. <code>{providerStrict: true}</code>
+            <code>additionalProperties: false</code> at <em>every</em> object level. <code>{provider: 'openai', strict: true}</code>
             applies that recursively, but strict mode forbids a truly absent property, so an optional field
             has to become <strong>nullable in the declaration</strong>.
           </p>
@@ -261,12 +262,12 @@ const parameters = toolSchemaFrom({
         patientId: StringContracts.Uuid(),
         note: NullableContracts.Nullable(StringContracts.NotEmpty()), // ◆
     },
-}, { providerStrict: true });
+}, { provider: 'openai', strict: true });
 // note → { type: ['string', 'null'], minLength: 1 }, and it is listed in `required`.
 // The model sends null; the same Nullable validator accepts it. No drift.
 </pre>
           </figure>
-          <p>A bare non-nullable optional parameter, or an open <code>Dictionary</code> map, can't be expressed under strict mode. adorn refuses to build those with an actionable message instead of letting the API return a silent 400 (DEC-068, DEC-069, DEC-071).</p>
+          <p>A bare non-nullable optional parameter, or an open <code>Dictionary</code> map, can't be expressed under strict mode. adorn refuses to build those with an actionable message instead of letting the API return a silent 400.</p>
         </section>
 
         <section id="privacy">
@@ -290,14 +291,14 @@ const parameters = toolSchemaFrom({
             value through aliases, template interpolation and destructuring to adorn's own emitters. It is
             report-only, permanently, and it states its limits on every run:
             <code>s.ssn.slice(-4)</code> isn't caught, and a raw <code>console.log</code> of a sensitive value is
-            yours to handle (DEC-025, DEC-028).
+            yours to handle.
           </p>
         </section>
 
         <section id="observability">
           <h2>The observability seam</h2>
           <p>
-            A neutral, zero-dependency seam (DEC-035 to DEC-037). <code>setObservationSink</code> installs one
+            A neutral, zero-dependency seam. <code>setObservationSink</code> installs one
             around-shaped <code>ObservationSink</code>. The enforcement weave emits value-free violation facts and
             completions, and <code>@Observe</code> emits completions carrying pre-disclosed values, redacted by
             default ("seeing ≠ emitting").
@@ -314,14 +315,13 @@ const parameters = toolSchemaFrom({
           <h2>The testing projection</h2>
           <p>
             <code>adorn/test</code> derives <code>fast-check</code> generators from descriptors. Its rule is
-            <strong>sound generation</strong>: produce only inputs the contract accepts, or decline and say so
-            (DEC-031). Its oracle consumes the <em>same</em> functions enforcement runs
+            <strong>sound generation</strong>: produce only inputs the contract accepts, or decline and say so.
+            Its oracle consumes the <em>same</em> functions enforcement runs
             (<code>evaluatePreconditions</code>, <code>evaluatePostconditions</code>,
-            <code>evaluateEnabledness</code>), so it flags an input exactly when the enforced wrapper would throw
-            (DEC-034).
+            <code>evaluateEnabledness</code>), so it flags an input exactly when the enforced wrapper would throw.
           </p>
           <p>
-            <code>fuzzSequence</code> extends this to stateful objects (DEC-090). A command is a method plus
+            <code>fuzzSequence</code> extends this to stateful objects. A command is a method plus
             generated arguments, and a sequence is an array of commands that fast-check shrinks structurally.
             Enabledness is resolved at run time against the real instance, so <code>fc.commands</code> is
             deliberately <em>not</em> used. It would force a parallel abstract model, which is exactly the drift
@@ -338,11 +338,11 @@ const parameters = toolSchemaFrom({
           <p>These are things adorn currently doesn't do, recorded as decisions rather than oversights.</p>
           <div class="grid grid-2">
             <div class="card"><h3>No TypeScript cross-check</h3><p><code>@GreaterThan(0) x: string</code> compiles. adorn removes drift <em>between projections</em>; it doesn't reconcile the descriptor with TypeScript's own view.</p></div>
-            <div class="card"><h3>Legacy decorators</h3><p>Parameter decorators exist only in legacy TypeScript. A Stage-3 adapter recording into the same core is on the roadmap (DEC-040).</p></div>
+            <div class="card"><h3>Legacy decorators</h3><p>Parameter decorators exist only in legacy TypeScript. A Stage-3 adapter recording into the same core is on the roadmap.</p></div>
             <div class="card"><h3>Closures stay closures</h3><p><code>@Requires</code>, <code>@Ensures</code> and <code>@EnabledWhen</code> carry no identity, so they're enforced and fuzzed but never projected.</p></div>
             <div class="card"><h3>Names from <code>toString()</code></h3><p>Parameter names are recovered from source text, so minification degrades them, though enforcement and projections degrade together.</p></div>
             <div class="card"><h3>No per-request policy</h3><p>Divergent enforcement per concurrent context isn't expressible today. Configuration is process-level.</p></div>
-            <div class="card"><h3>Add-ons stay out of core</h3><p>Resilience, limits, caching and policy decorators belong in separate packages, so the root stays dependent on <code>tslib</code> only (DEC-041, DEC-042).</p></div>
+            <div class="card"><h3>Add-ons stay out of core</h3><p>Resilience, limits, caching and policy decorators belong in separate packages, so the root stays dependent on <code>tslib</code> only.</p></div>
           </div>
           <div class="hero-actions">
             <a class="button primary" href="reference.html">Use the reference</a>
