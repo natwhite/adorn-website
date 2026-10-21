@@ -26,7 +26,9 @@
 
   fetch('vendor/adorn.version.json').then((r) => r.json()).then((v) => { $('pgVersion').textContent = v.version; }).catch(() => {});
 
-  const SCOPE = ['NumberContracts', 'StringContracts', 'EnumContracts', 'ArrayContracts', 'ObjectContracts', 'NullableContracts'];
+  // `Contracts` is the facade — the recommended descriptor surface. The per-type namespaces stay in scope too,
+  // so a hand-typed example in either style still evaluates.
+  const SCOPE = ['Contracts', 'NumberContracts', 'StringContracts', 'EnumContracts', 'ArrayContracts', 'ObjectContracts', 'NullableContracts', 'BooleanContracts'];
 
   const EXAMPLES = [
     {
@@ -34,9 +36,9 @@
       name: 'book', description: 'Book an available slot.', strict: false,
       params: `{
     // slots known only at runtime: no decorator could express this enum
-    slotId: EnumContracts.OneOf(['fri-1000', 'fri-1400', 'thu-0900']),
-    partySize: NumberContracts.Between(1, 8),
-    name: StringContracts.NotEmpty(),
+    slotId: Contracts.enum(['fri-1000', 'fri-1400', 'thu-0900']),
+    partySize: Contracts.number.between(1, 8),
+    name: Contracts.string.notEmpty(),
 }`,
       reply: '{ "slotId": "fri-1000", "partySize": 2, "name": "Ada" }',
     },
@@ -44,9 +46,9 @@
       label: 'The model hallucinates a slot',
       name: 'book', description: 'Book an available slot.', strict: false,
       params: `{
-    slotId: EnumContracts.OneOf(['fri-1000', 'fri-1400', 'thu-0900']),
-    partySize: NumberContracts.Between(1, 8),
-    name: StringContracts.NotEmpty(),
+    slotId: Contracts.enum(['fri-1000', 'fri-1400', 'thu-0900']),
+    partySize: Contracts.number.between(1, 8),
+    name: Contracts.string.notEmpty(),
 }`,
       reply: '{ "slotId": "mon-0800", "partySize": 2, "name": "Ada" }',
     },
@@ -54,9 +56,9 @@
       label: 'OpenAI strict mode with a nullable note',
       name: 'scheduleReminder', description: 'Schedule a reminder for a patient, optionally with a note.', strict: true,
       params: `{
-    patientId: StringContracts.Uuid(),
+    patientId: Contracts.string.uuid(),
     // strict mode forbids absent properties, so "optional" means nullable
-    note: NullableContracts.Nullable(StringContracts.NotEmpty()),
+    note: Contracts.nullable(Contracts.string.notEmpty()),
 }`,
       reply: '{ "patientId": "3f7c1e94-2a8b-4d6f-9c11-5b0e2a7d8f34", "note": null }',
     },
@@ -64,11 +66,11 @@
       label: 'A bad element deep in a nested list',
       name: 'addMember', description: 'Add a team member.', strict: false,
       params: `{
-    member: ObjectContracts.Fields({
-        name: StringContracts.NotEmpty(),
-        email: StringContracts.Email(),
-        roles: ArrayContracts.ArrayOf(
-            EnumContracts.OneOf(['admin', 'editor', 'viewer']),
+    member: Contracts.object({
+        name: Contracts.string.notEmpty(),
+        email: Contracts.string.email(),
+        roles: Contracts.array(
+            Contracts.enum(['admin', 'editor', 'viewer']),
             { minItems: 1 },
         ),
     }),
@@ -79,9 +81,9 @@
       label: 'Strict mode refuses an open map at build time',
       name: 'tag', description: 'Attach free-form tags.', strict: true,
       params: `{
-    id: StringContracts.Uuid(),
+    id: Contracts.string.uuid(),
     // an open Record<string, V> can't be expressed in OpenAI strict mode
-    tags: ObjectContracts.Dictionary(StringContracts.NotEmpty()),
+    tags: Contracts.dictionary(Contracts.string.notEmpty()),
 }`,
       reply: '{ "id": "3f7c1e94-2a8b-4d6f-9c11-5b0e2a7d8f34", "tags": { "env": "prod" } }',
     },
@@ -130,7 +132,7 @@
 
     // 1. The schema the model reads.
     try {
-      const schema = lib.toolSchemaFrom({ name: current.name, description: current.description, params }, { providerStrict: strictEl.checked });
+      const schema = lib.toolSchemaFrom({ name: current.name, description: current.description, params }, { provider: 'openai', strict: strictEl.checked });
       show(schemaEl, JSON.stringify(schema, null, 2), 'json');
     } catch (e) {
       show(schemaEl, '// toolSchemaFrom refused to build this schema:\n// ' + String(e.message).split('\n').join('\n// '), 'ts');
@@ -146,7 +148,7 @@
       return;
     }
     try {
-      const result = lib.Verify.check(lib.ObjectContracts.Fields(params), 'args', reply);
+      const result = lib.Verify.check(lib.Contracts.object(params), 'args', reply);
       show(checkEl, JSON.stringify(result, null, 2), 'json');
       if (result.ok) setStatus(verdictEl, true, '✓ ok: the body would run with these arguments');
       else setStatus(verdictEl, false, `✗ rejected at ${JSON.stringify(result.path || [])}: expected ${result.expected || result.constraint}`);

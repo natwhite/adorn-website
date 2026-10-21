@@ -262,7 +262,7 @@ _Look up a weather forecast._
         <div class="playground">
           <div class="pg-pane">
             <figure class="code">
-              <div class="code-head"><span>params — descriptors in scope: NumberContracts, StringContracts, EnumContracts, ArrayContracts, ObjectContracts, NullableContracts</span></div>
+              <div class="code-head"><span>params — descriptors in scope: Contracts (the facade), or NumberContracts, StringContracts, EnumContracts, ArrayContracts, ObjectContracts, NullableContracts</span></div>
               <textarea id="pgParams" wrap="off" class="pg-editor" spellcheck="false" aria-label="Tool parameter descriptors (JavaScript)"></textarea>
               <div class="verdict" id="pgParamsStatus" role="status"></div>
             </figure>
@@ -277,7 +277,7 @@ _Look up a weather forecast._
               <pre class="pg-out" id="pgSchema" aria-live="polite"></pre>
             </figure>
             <figure class="code">
-              <div class="code-head"><span>Verify.check(ObjectContracts.Fields(params), 'args', reply)</span></div>
+              <div class="code-head"><span>Verify.check(Contracts.object(params), 'args', reply)</span></div>
               <pre class="pg-out" id="pgCheck" aria-live="polite"></pre>
               <div class="verdict" id="pgVerdict"></div>
             </figure>
