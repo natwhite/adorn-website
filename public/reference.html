@@ -82,14 +82,14 @@
 <pre data-lang="bash">
 npm i adorn
 </pre></figure>
-          <p>The only runtime dependency is <code>tslib</code>. It ships CommonJS with <code>.d.ts</code> types and supports Node.js 20.19 and later (CI runs 20.19, 22 and 24).</p>
+          <p>The only runtime dependency is <code>tslib</code>. It ships <strong>dual ESM + CommonJS</strong> through its <code>exports</code> map (<code>import</code> → a tree-shakeable ESM build, <code>require</code> → CommonJS, one shared set of <code>.d.ts</code>) and supports Node.js 20.19 and later (CI runs 20.19, 22 and 24).</p>
 
           <h3>2 · Enable decorators</h3>
           <figure class="code"><div class="code-head"><span>tsconfig.json</span><button class="copy" type="button">copy</button></div>
 <pre data-lang="json">
-{ "compilerOptions": { "experimentalDecorators": true, "emitDecoratorMetadata": true } }
+{ "compilerOptions": { "experimentalDecorators": true } }
 </pre></figure>
-          <p><code>reflect-metadata</code> is <strong>not</strong> required. Without it, the generated docs just lose their <code>Type</code> column. The decorator path needs a metadata-emitting compiler (<code>tsc</code>, ts-node, ts-jest), and esbuild, SWC, Vite and Bun don't emit that metadata. The descriptor-first path (<code>Verify</code>, <code>contract()</code>, <code>toolSchemaFrom</code>) works with no flags at all.</p>
+          <p>Decorator <em>syntax</em> needs only <code>experimentalDecorators</code>. <code>emitDecoratorMetadata</code> and <code>reflect-metadata</code> are optional and purely cosmetic: together they fill the inferred <code>Type</code> column in generated docs from <code>design:paramtypes</code>, and nothing else — enforcement, every projection and the tool schemas read the reified descriptor, not reflected metadata. Any <code>experimentalDecorators</code>-capable compiler works; for that optional <code>Type</code> column, <code>tsc</code>, ts-node, ts-jest and <strong>SWC</strong> (<code>legacyDecorator</code> + <code>decoratorMetadata</code>) emit the metadata, while esbuild, Vite and Bun don't. The descriptor-first path (<code>Verify</code>, <code>contract()</code>, <code>toolSchemaFrom</code>) works with no flags at all.</p>
 
           <h3>3 · Contract a tool</h3>
           <figure class="code"><div class="code-head"><span>weather.ts</span><button class="copy" type="button">copy</button></div>
