@@ -6,6 +6,13 @@
     "directory": "./public",
     "not_found_handling": "404-page"
   },
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "persist": true
+    }
+  },
   // Wrangler attaches these as custom domains (DNS record + certificate managed by Cloudflare).
   "routes": [
     { "pattern": "adorn-ts.dev", "custom_domain": true },
