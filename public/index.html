@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>adorn | Contracts as data for TypeScript</title>
-  <meta name="description" content="adorn turns one TypeScript declaration into an LLM tool schema, a runtime validator, JSON Schema, docs, and observability. They're all derived from the same source, so they can't drift.">
+  <title>adorn | Contract-driven development for TypeScript</title>
+  <meta name="description" content="adorn is contract-driven development for TypeScript. Declare a function's contract once; runtime validation, JSON Schema, docs, tests, observability, and an LLM tool schema all derive from the same declaration, so they can't drift.">
   <meta name="theme-color" content="#f6f3ec" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#131219" media="(prefers-color-scheme: dark)">
-  <meta property="og:title" content="adorn — one declaration, every artifact">
-  <meta property="og:description" content="Decorators adorn a function with its contract: the tool schema an LLM reads and the validation its reply faces come from the same line.">
+  <meta property="og:title" content="adorn — contract-driven development for TypeScript">
+  <meta property="og:description" content="Declare a function's contract once. Runtime enforcement, schemas, docs, tests and telemetry derive from the same declaration instead of being maintained by hand, so they can't drift.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://adorn-ts.dev/assets/social-card.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -56,13 +56,14 @@
       <div class="container">
         <div class="hero-grid">
           <div>
-            <p class="eyebrow">Contracts as data for TypeScript</p>
+            <p class="eyebrow">Contract-driven development for TypeScript</p>
             <h1>One declaration.<br><em>Every</em> artifact.</h1>
             <p class="lede">
-              Decorators <strong>adorn</strong> a function with its contract. The constraint you write on a
-              parameter is the JSON Schema an LLM reads <em>and</em> the check its reply has to pass. It also
-              produces the docs and the telemetry. Everything comes from one declaration, so the artifacts
-              can't drift apart.
+              Decorators <strong>adorn</strong> a function with its contract &mdash; what its inputs must
+              satisfy, what has to hold before and after. Runtime enforcement, JSON Schema, documentation,
+              tests and telemetry are all <em>derived</em> from that one declaration instead of maintained by
+              hand, so they can't drift apart. An LLM tool schema is one of those derived artifacts, not the
+              point.
             </p>
             <div class="hero-actions">
               <a class="button primary" href="reference.html#getting-started">Get started</a>
@@ -70,9 +71,8 @@
               <a class="button ghost" href="architecture.html">How it works</a>
             </div>
             <p class="status-note">
-              <strong>0.1.0, MIT.</strong> The only runtime dependency is <code>tslib</code>. The suite is
-              1,355 tests across 78 suites, and the public surface is pinned by a test. The generated tool
-              schemas have been run end to end through OpenAI function calling.
+              <strong>0.1.0, MIT.</strong> The only runtime dependency is <code>tslib</code>. It's backed by a
+              large test suite, and the public surface is pinned by a test so it can't drift unnoticed.
             </p>
           </div>
 
@@ -99,12 +99,12 @@ class WeatherTool {
 
             <div>
               <div class="derive-tabs" role="tablist" aria-label="Derived artifacts">
-                <button role="tab" id="t-tool" aria-controls="p-tool" aria-selected="true">Tool schema</button>
-                <button role="tab" id="t-check" aria-controls="p-check" aria-selected="false" tabindex="-1">Runtime check</button>
+                <button role="tab" id="t-check" aria-controls="p-check" aria-selected="true">Runtime check</button>
+                <button role="tab" id="t-tool" aria-controls="p-tool" aria-selected="false" tabindex="-1">Tool schema</button>
                 <button role="tab" id="t-docs" aria-controls="p-docs" aria-selected="false" tabindex="-1">Docs</button>
                 <button role="tab" id="t-tele" aria-controls="p-tele" aria-selected="false" tabindex="-1">Privacy review</button>
               </div>
-              <figure class="code derive-panel" id="p-tool" role="tabpanel" aria-labelledby="t-tool">
+              <figure class="code derive-panel" id="p-tool" role="tabpanel" aria-labelledby="t-tool" hidden>
                 <div class="code-head"><span>toolSchemaForMethod(WeatherTool, 'getWeather')</span><button class="copy" type="button">copy</button></div>
 <pre data-lang="json">
 {
@@ -123,10 +123,10 @@ class WeatherTool {
 }
 </pre>
               </figure>
-              <figure class="code derive-panel" id="p-check" role="tabpanel" aria-labelledby="t-check" hidden>
+              <figure class="code derive-panel" id="p-check" role="tabpanel" aria-labelledby="t-check">
                 <div class="code-head"><span>new WeatherTool().getWeather('Lisbon', 'celsius', 99)</span></div>
 <pre data-lang="ts">
-// throws before the body runs: the model asked for 99 days
+// throws before the body runs: a caller asked for 99 days
 Value Error: WeatherTool.getWeather(location, unit, days)
   parameter 'days' expected a number less than or equal to 7
   but received [REDACTED] instead
@@ -169,10 +169,10 @@ _Look up a weather forecast._
         </div>
 
         <div class="feature-strip">
-          <div><strong>Change one line</strong><span><code>@LessThanEqual(14)</code> changes the schema the model reads and the check its reply faces together.</span></div>
+          <div><strong>Change one line</strong><span><code>@LessThanEqual(14)</code> moves the schema a consumer reads and the check its input faces together.</span></div>
+          <div><strong>One source, many readers</strong><span>The same descriptor is read by the validator, the JSON Schema, the docs and the fuzzer.</span></div>
           <div><strong>Total predicates</strong><span><code>null</code>, <code>NaN</code> or the wrong type is reported as a contract violation, never a bare <code>TypeError</code>.</span></div>
           <div><strong>Redacted by default</strong><span>Every path adorn emits through prints <code>[REDACTED]</code> unless you opt in.</span></div>
-          <div><strong>Proven, not asserted</strong><span>Generated schemas round-trip through OpenAI's live API, strict mode included.</span></div>
         </div>
       </div>
     </section>
@@ -205,6 +205,15 @@ _Look up a weather forecast._
             <p><code>@Contract()</code> wraps each contracted method, so a call with invalid arguments is rejected before the body runs. adorn validates and never coerces: a malformed argument is a violation, not something to quietly patch up.</p>
           </article>
         </div>
+        <div class="callout reveal" style="margin-top:1.8rem">
+          <strong>This is contract-driven development</strong>
+          <p>
+            Declare what inputs are valid. Declare what must hold before the call, and what the function
+            promises after. <em>Then</em> implement the body. The contract isn't documentation <em>about</em>
+            the implementation &mdash; it's part of the program: enforced at the boundary, and read by every
+            artifact that needs to know what the function expects.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -220,6 +229,20 @@ _Look up a weather forecast._
             class decorator <em>installs</em> enforcement, and projections <em>read</em> the same registry.
           </p>
         </div>
+
+        <div class="hierarchy reveal" role="img" aria-label="A contract is reified as a descriptor. From that one descriptor, adorn can enforce it, reason about it, and project it into schemas, docs, tests, telemetry and tool APIs.">
+          <div class="hierarchy-node is-root"><span class="tag">contract</span><strong>What must be true</strong></div>
+          <div class="flow-arrow" aria-hidden="true">&darr;&nbsp; reified as data</div>
+          <div class="hierarchy-node is-core"><span class="tag">descriptor</span><strong>an identity + JSON-serializable params</strong></div>
+          <div class="flow-arrow" aria-hidden="true">&darr;</div>
+          <div class="hierarchy-branches">
+            <div><b>enforce</b><span>pre/postconditions &middot; fields &middot; boundaries</span></div>
+            <div><b>reason about</b><span>inspect &middot; compose &middot; serialize</span></div>
+            <div><b>project</b><span>schemas &middot; docs &middot; tests &middot; telemetry &middot; tool APIs</span></div>
+          </div>
+          <p class="hierarchy-note">The contract is the product. Everything below it is a consequence.</p>
+        </div>
+
         <ol class="pipeline reveal">
           <li><strong>Declare</strong><span>Parameter, field and method decorators, or plain descriptors with no decorator at all.</span></li>
           <li><strong>Record</strong><span>Each constraint is stored as a reified descriptor against <code>(prototype, method, index)</code>.</span></li>
@@ -257,40 +280,46 @@ _Look up a weather forecast._
       </div>
     </section>
 
-    <!-- ============ EVIDENCE ============ -->
+    <!-- ============ ONE DESCRIPTOR, MANY CONSUMERS ============ -->
     <section class="section" id="evidence">
       <div class="container">
         <div class="section-head reveal">
-          <p class="eyebrow">Evidence</p>
-          <h2>Round-tripped through a real model.</h2>
+          <p class="eyebrow">One descriptor, many consumers</p>
+          <h2>Write the constraint once. Every consumer reads the same record.</h2>
           <p>
-            The schemas adorn generates were sent to OpenAI's live function-calling API (<code>gpt-4o-mini</code>,
-            temperature 0). Each schema was accepted, the model returned a tool call, and its arguments were
-            validated against <strong>the same declaration</strong> that produced the schema.
+            A constraint is a reified descriptor &mdash; an identity plus JSON-serializable params, with the
+            predicate derived from them. Here is <code>days</code> from the method above, traced mechanically
+            into each thing adorn produces. Nothing is written twice.
           </p>
         </div>
-        <div class="table-wrap reveal">
-          <table>
-            <thead><tr><th>Case</th><th>HTTP</th><th>Schema accepted</th><th>Args valid</th><th>Verdict</th></tr></thead>
-            <tbody>
-              <tr class="evidence-row"><td><strong>reminder</strong>: OpenAI strict mode + a <code>Nullable</code> optional field</td><td>200</td><td>yes</td><td>yes</td><td><span class="pill ok">ROUND-TRIP OK</span></td></tr>
-              <tr class="evidence-row"><td><strong>book</strong>: a <code>Fields</code> param with an optional field (non-strict)</td><td>200</td><td>yes</td><td>yes</td><td><span class="pill ok">ROUND-TRIP OK</span></td></tr>
-              <tr class="evidence-row"><td><strong>bookStrict</strong>: a <code>Fields</code> param, all fields required (strict)</td><td>200</td><td>yes</td><td>yes</td><td><span class="pill ok">ROUND-TRIP OK</span></td></tr>
-              <tr class="evidence-row"><td><strong>bookStrictOpt</strong>: a nested nullable optional field (strict)</td><td>200</td><td>yes</td><td>yes</td><td><span class="pill ok">ROUND-TRIP OK</span></td></tr>
-            </tbody>
-          </table>
+
+        <div class="fanout reveal" role="img" aria-label="One descriptor for days — GreaterThanEqual(1) and LessThanEqual(7) — is read by six consumers: the runtime predicate, a JSON Schema fragment, the LLM tool-schema property, a documentation row, a fast-check arbitrary, and the privacy review.">
+          <div class="fanout-hub">
+            <span class="fanout-kicker">one descriptor</span>
+            <code>GreaterThanEqual(1) &middot; LessThanEqual(7)</code>
+            <span class="fanout-sub">identity + JSON params &rarr; derived predicate</span>
+          </div>
+          <div class="flow-arrow" aria-hidden="true">&darr;&nbsp; read by</div>
+          <div class="fanout-grid">
+            <div class="fanout-node"><span class="fanout-tag enforce">enforce</span><strong>Runtime predicate</strong><code>getWeather(_, _, 99) &rarr; violation</code></div>
+            <div class="fanout-node"><span class="fanout-tag project">project</span><strong>JSON Schema</strong><code>{ minimum: 1, maximum: 7 }</code></div>
+            <div class="fanout-node"><span class="fanout-tag project">project</span><strong>LLM tool schema</strong><code>the same, in the provider's dialect</code></div>
+            <div class="fanout-node"><span class="fanout-tag project">project</span><strong>Documentation</strong><code>"a number from 1 to 7"</code></div>
+            <div class="fanout-node"><span class="fanout-tag project">project</span><strong>Property tests</strong><code>fast-check arbitrary in [1, 7]</code></div>
+            <div class="fanout-node"><span class="fanout-tag reason">reason</span><strong>Privacy review</strong><code>disclosure, value-free</code></div>
+          </div>
         </div>
-        <div class="grid grid-2" style="margin-top:1.1rem">
+
+        <div class="grid grid-2" style="margin-top:1.6rem">
           <div class="card reveal">
             <h3>The validator is the real guard</h3>
             <p>Run locally with no network: a bad nested date-time is rejected at <code>["when"]</code>, and so is a missing required field. <code>Nullable(NotEmpty())</code> accepts <code>null</code> and still rejects <code>""</code>.</p>
           </div>
           <div class="card reveal">
-            <h3>Refused at build time, not by a 400</h3>
-            <p>Strict mode can't express a truly optional property, so a bare non-nullable <code>@Optional</code> under OpenAI strict mode fails at build time with an actionable message. Without that, OpenAI would just reject the request.</p>
+            <h3>The tool schema, checked against a real provider</h3>
+            <p>Because a machine produces malformed input the instant a schema is wrong, the tool-schema projection was round-tripped end to end through OpenAI's live function-calling API (<code>gpt-4o-mini</code>, temperature 0): schema accepted, tool call returned, its arguments validated against <strong>the same declaration</strong> &mdash; nested objects, nullable-optional fields and strict mode included. Evidence: <a href="https://github.com/natwhite/adorn/blob/master/docs/q31-capstone-results.md">docs/q31-capstone-results.md</a>.</p>
           </div>
         </div>
-        <p class="pg-note">The verbatim schemas and method are in <a href="https://github.com/natwhite/adorn/blob/master/docs/q31-capstone-results.md">docs/q31-capstone-results.md</a>.</p>
       </div>
     </section>
 
@@ -475,7 +504,7 @@ console.log(formatSequenceReport(report));
     <section class="section section-alt cta-band">
       <div class="container">
         <h2>Write the contract once.</h2>
-        <p class="lede">The tool schema, the validator, the docs and the telemetry follow from it.</p>
+        <p class="lede">The validator, the docs, the tests and the tool schema all follow from it.</p>
         <div class="hero-actions">
           <a class="button primary" href="reference.html#getting-started">Get started</a>
           <a class="button ghost" href="https://github.com/natwhite/adorn">Star on GitHub</a>
@@ -486,7 +515,7 @@ console.log(formatSequenceReport(report));
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <span>adorn · contracts as data for TypeScript · MIT © <span data-year>2026</span> natwhite</span>
+      <span>adorn · contract-driven development for TypeScript · MIT © <span data-year>2026</span> natwhite</span>
       <nav class="footer-links" aria-label="Footer">
         <a href="index.html">Overview</a>
         <a href="architecture.html">Architecture</a>
