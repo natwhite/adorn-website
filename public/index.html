@@ -81,8 +81,7 @@
               <div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span>weather.ts</span><button class="copy" type="button">copy</button></div>
 <pre data-lang="ts">
 @Contract()
-class WeatherTool {
-    @Tool('Look up a weather forecast.')
+class WeatherService {
     getWeather(
         @Describe('the city to look up') @NotEmpty() location: string,
         @OneOf(['celsius', 'fahrenheit']) unit: string,
@@ -105,10 +104,10 @@ class WeatherTool {
                 <button role="tab" id="t-tele" aria-controls="p-tele" aria-selected="false" tabindex="-1">Privacy review</button>
               </div>
               <figure class="code derive-panel" id="p-tool" role="tabpanel" aria-labelledby="t-tool" hidden>
-                <div class="code-head"><span>toolSchemaForMethod(WeatherTool, 'getWeather')</span><button class="copy" type="button">copy</button></div>
+                <div class="code-head"><span>toolSchemaForMethod(WeatherService, 'getWeather', { description })</span><button class="copy" type="button">copy</button></div>
 <pre data-lang="json">
 {
-  "title": "WeatherTool.getWeather",
+  "title": "WeatherService.getWeather",
   "description": "Look up a weather forecast.",
   "type": "object",
   "properties": {
@@ -124,10 +123,10 @@ class WeatherTool {
 </pre>
               </figure>
               <figure class="code derive-panel" id="p-check" role="tabpanel" aria-labelledby="t-check">
-                <div class="code-head"><span>new WeatherTool().getWeather('Lisbon', 'celsius', 99)</span></div>
+                <div class="code-head"><span>new WeatherService().getWeather('Lisbon', 'celsius', 99)</span></div>
 <pre data-lang="ts">
 // throws before the body runs: a caller asked for 99 days
-Value Error: WeatherTool.getWeather(location, unit, days)
+Value Error: WeatherService.getWeather(location, unit, days)
   parameter 'days' expected a number less than or equal to 7
   but received [REDACTED] instead
 
@@ -135,11 +134,9 @@ Value Error: WeatherTool.getWeather(location, unit, days)
 </pre>
               </figure>
               <figure class="code derive-panel" id="p-docs" role="tabpanel" aria-labelledby="t-docs" hidden>
-                <div class="code-head"><span>renderMarkdown([documentClass(WeatherTool)])</span></div>
+                <div class="code-head"><span>renderMarkdown([documentClass(WeatherService)])</span></div>
 <pre data-lang="bash">
-### WeatherTool.getWeather(location, unit, days)
-
-_Look up a weather forecast._
+### WeatherService.getWeather(location, unit, days)
 
 | Parameter    | Constraint | Expectation                          |
 | ------------ | ---------- | ------------------------------------ |
@@ -150,9 +147,9 @@ _Look up a weather forecast._
 </pre>
               </figure>
               <figure class="code derive-panel" id="p-tele" role="tabpanel" aria-labelledby="t-tele" hidden>
-                <div class="code-head"><span>serializeTelemetry(telemetryForClass(WeatherTool))</span></div>
+                <div class="code-head"><span>serializeTelemetry(telemetryForClass(WeatherService))</span></div>
 <pre data-lang="bash">
-## WeatherTool · getWeather
+## WeatherService · getWeather
 
 | Position | Name       | Discloses          | @Sensitive |
 | -------- | ---------- | ------------------ | ---------- |
@@ -192,7 +189,7 @@ _Look up a weather forecast._
           <article class="card reveal">
             <span class="num">01 · DRIFT</span>
             <h3>Copies disagree</h3>
-            <p>Raise a limit in the validator and forget the schema, and the model is told one thing while the code enforces another. A drifted doc misleads a human who can compensate. A drifted tool schema silently corrupts every call.</p>
+            <p>Raise a limit in the validator and forget the schema, and the schema promises one thing while the code enforces another. A drifted doc misleads a human who can compensate; a drifted tool schema silently corrupts every call.</p>
           </article>
           <article class="card reveal">
             <span class="num">02 · DATA</span>
@@ -270,7 +267,7 @@ _Look up a weather forecast._
           <p>
             A StackBlitz sandbox installs <a href="https://www.npmjs.com/package/adorn">adorn</a> from npm and
             runs it in a real Node toolchain — the decorator syntax above, not a mock-up. Change a constraint
-            and re-run: the tool schema an LLM reads and the runtime check a reply must pass move together.
+            and re-run: the schema a consumer reads and the runtime check its input must pass move together.
           </p>
         </div>
         <div class="hero-actions reveal">
@@ -464,10 +461,10 @@ console.log(formatSequenceReport(report));
           <div class="card">
             <h3>Reach for adorn when</h3>
             <ul>
-              <li>you expose methods as LLM tools and need the schema and validation to agree</li>
               <li>you validate untrusted input at an HTTP or queue boundary</li>
               <li>you want docs and privacy reviews that can't go stale</li>
               <li>you want property-based tests derived from contracts you already wrote</li>
+              <li>you expose methods as LLM tools and need the schema and validation to agree</li>
             </ul>
           </div>
           <div class="card">

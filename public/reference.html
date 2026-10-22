@@ -91,18 +91,16 @@ npm i adorn
 </pre></figure>
           <p>Decorator <em>syntax</em> needs only <code>experimentalDecorators</code>. <code>emitDecoratorMetadata</code> and <code>reflect-metadata</code> are optional and purely cosmetic: together they fill the inferred <code>Type</code> column in generated docs from <code>design:paramtypes</code>, and nothing else — enforcement, every projection and the tool schemas read the reified descriptor, not reflected metadata. Any <code>experimentalDecorators</code>-capable compiler works; for that optional <code>Type</code> column, <code>tsc</code>, ts-node, ts-jest and <strong>SWC</strong> (<code>legacyDecorator</code> + <code>decoratorMetadata</code>) emit the metadata, while esbuild, Vite and Bun don't. The descriptor-first path (<code>Verify</code>, <code>contract()</code>, <code>toolSchemaFrom</code>) works with no flags at all.</p>
 
-          <h3>3 · Contract a tool</h3>
+          <h3>3 · Contract a method</h3>
           <figure class="code"><div class="code-head"><span>weather.ts</span><button class="copy" type="button">copy</button></div>
 <pre data-lang="ts">
 import {
-    Contract, Tool, Describe, NotEmpty, OneOf,
+    Contract, Describe, NotEmpty, OneOf,
     GreaterThanEqual, LessThanEqual,
 } from 'adorn';
-import { toolSchemaForMethod } from 'adorn/schema';
 
 @Contract()
-export class WeatherTool {
-    @Tool('Look up a weather forecast.')
+export class WeatherService {
     getWeather(
         @Describe('the city to look up') @NotEmpty() location: string,
         @OneOf(['celsius', 'fahrenheit']) unit: string,
@@ -111,24 +109,33 @@ export class WeatherTool {
         return `${days}-day forecast for ${location} in ${unit}`;
     }
 }
-
-// Hand this to a JSON-Schema-style function-calling API as the tool's `parameters`, subject to the provider's dialect:
-export const parameters = toolSchemaForMethod(WeatherTool, 'getWeather');
 </pre></figure>
 
-          <h3>4 · Route the model's call through it</h3>
-          <figure class="code"><div class="code-head"><span>agent.ts</span><button class="copy" type="button">copy</button></div>
+          <h3>4 · Call it — invalid input never reaches the body</h3>
+          <figure class="code"><div class="code-head"><span>usage.ts</span><button class="copy" type="button">copy</button></div>
 <pre data-lang="ts">
-const tool = new WeatherTool();
-const args = JSON.parse(toolCall.function.arguments);
+const weather = new WeatherService();
 
-try {
-    return tool.getWeather(args.location, args.unit, args.days);
-} catch (e) {
-    // A contract violation: hand the message back to the model so it can retry.
-    return `error: ${(e as Error).message}`;
-}
+weather.getWeather('Lisbon', 'celsius', 3);   // ok — the body runs
+weather.getWeather('Lisbon', 'celsius', 99);  // throws: 'days' must be ≤ 7; the body never runs
 </pre></figure>
+
+          <h3>5 · Project the same contract</h3>
+          <figure class="code"><div class="code-head"><span>projections.ts</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+import { schemaForClass, documentClass, renderMarkdown, toolSchemaForMethod } from 'adorn/schema';
+
+// One declaration, read many ways — none can disagree:
+const schema = schemaForClass(WeatherService);                 // descriptive JSON Schema (2020-12)
+const docs = renderMarkdown([documentClass(WeatherService)]);  // Markdown documentation
+const tool = toolSchemaForMethod(WeatherService, 'getWeather', {
+    description: 'Look up a weather forecast.',                 // the prescriptive LLM tool schema
+});
+</pre></figure>
+          <div class="callout">
+            <strong>One application: an LLM tool</strong>
+            <p>Hand <code>tool</code> to a function-calling API as the tool's <code>parameters</code> (subject to the provider's dialect; add <code>{ provider: 'openai', strict: true }</code> for OpenAI strict mode). When the model replies, route its arguments back through <code>new WeatherService().getWeather(...)</code> — the <em>same</em> contract that produced the schema rejects a bad reply before the body runs.</p>
+          </div>
           <div class="callout">
             <strong>Prefer a value to an exception?</strong>
             <p>Validate the parsed arguments first with <code>Verify.check(ObjectContracts.Fields({...}), 'args', args)</code>, which returns <code>{ok, value}</code> or <code>{ok: false, path, expected, message}</code>. See <a href="#values">Working with values</a>.</p>
