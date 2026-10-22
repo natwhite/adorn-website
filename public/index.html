@@ -31,7 +31,7 @@
       </a>
       <nav class="site-nav" id="siteNav" aria-label="Site">
         <a href="index.html" aria-current="page">Overview</a>
-        <a href="index.html#playground">Playground</a>
+        <a href="playground.html">Playground</a>
         <a href="architecture.html">Architecture</a>
         <a href="reference.html">Reference</a>
       </nav>
@@ -66,7 +66,7 @@
             </p>
             <div class="hero-actions">
               <a class="button primary" href="reference.html#getting-started">Get started</a>
-              <a class="button ghost" href="#playground">Try it in the browser</a>
+              <a class="button ghost" href="playground.html">Try it in the browser</a>
               <a class="button ghost" href="architecture.html">How it works</a>
             </div>
             <p class="status-note">
@@ -238,57 +238,22 @@ _Look up a weather forecast._
       </div>
     </section>
 
-    <!-- ============ PLAYGROUND ============ -->
+    <!-- ============ PLAYGROUND (lives on its own page) ============ -->
     <section class="section section-alt" id="playground">
       <div class="container">
         <div class="section-head reveal">
           <p class="eyebrow">Playground · real adorn, in your browser</p>
-          <h2>Edit the declaration. Watch both sides move.</h2>
+          <h2>Edit the declaration. Watch every artifact move.</h2>
           <p>
-            This isn't a mock-up. The page loads the actual adorn build (<span id="pgVersion">0.1.0</span>),
-            bundled from <code>dist/</code>. The left pane declares tool arguments as descriptors. The right
-            side shows the tool schema built from them and checks a model reply against the <em>same</em>
-            declaration.
+            A StackBlitz sandbox installs <a href="https://www.npmjs.com/package/adorn">adorn</a> from npm and
+            runs it in a real Node toolchain — the decorator syntax above, not a mock-up. Change a constraint
+            and re-run: the tool schema an LLM reads and the runtime check a reply must pass move together.
           </p>
         </div>
-
-        <div class="pg-toolbar">
-          <label>Example
-            <select id="pgExample" aria-label="Choose an example"></select>
-          </label>
-          <label class="switch"><input type="checkbox" id="pgStrict"> OpenAI strict mode</label>
+        <div class="hero-actions reveal">
+          <a class="button primary" href="playground.html">Open the playground</a>
+          <a class="button ghost" href="reference.html#getting-started">Get started</a>
         </div>
-
-        <div class="playground">
-          <div class="pg-pane">
-            <figure class="code">
-              <div class="code-head"><span>params — descriptors in scope: Contracts (the facade), or NumberContracts, StringContracts, EnumContracts, ArrayContracts, ObjectContracts, NullableContracts</span></div>
-              <textarea id="pgParams" wrap="off" class="pg-editor" spellcheck="false" aria-label="Tool parameter descriptors (JavaScript)"></textarea>
-              <div class="verdict" id="pgParamsStatus" role="status"></div>
-            </figure>
-            <figure class="code" style="margin-top:1.1rem">
-              <div class="code-head"><span>a model's reply: the tool-call arguments (JSON)</span></div>
-              <textarea id="pgReply" wrap="off" class="pg-editor small" spellcheck="false" aria-label="Model reply arguments (JSON)"></textarea>
-            </figure>
-          </div>
-          <div class="pg-pane">
-            <figure class="code">
-              <div class="code-head"><span>toolSchemaFrom({ name, description, params })</span><button class="copy" type="button" data-target="pgSchema">copy</button></div>
-              <pre class="pg-out" id="pgSchema" aria-live="polite"></pre>
-            </figure>
-            <figure class="code">
-              <div class="code-head"><span>Verify.check(Contracts.object(params), 'args', reply)</span></div>
-              <pre class="pg-out" id="pgCheck" aria-live="polite"></pre>
-              <div class="verdict" id="pgVerdict"></div>
-            </figure>
-          </div>
-        </div>
-        <p class="pg-note">
-          The params pane is evaluated as JavaScript in your browser, and nothing is sent anywhere. Try
-          changing <code>Between(1, 8)</code>: the schema's <code>minimum</code>/<code>maximum</code> and
-          the verdict on the reply change together. This is the descriptor-first path. The decorator form
-          (<code>@Between(1, 8)</code> on a parameter) records exactly the same descriptor.
-        </p>
       </div>
     </section>
 
@@ -532,8 +497,6 @@ console.log(formatSequenceReport(report));
     </div>
   </footer>
 
-  <script src="vendor/adorn.browser.js"></script>
   <script src="app.js"></script>
-  <script src="playground.js"></script>
 </body>
 </html>

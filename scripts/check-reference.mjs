@@ -1,7 +1,6 @@
 // Fails if the site's API index (public/reference-data.js) drifts from the library: every runtime export
 // of adorn, adorn/schema, adorn/introspection, adorn/observe, adorn/privacy, adorn/test and adorn/otel
 // must have exactly one entry, and no entry may name a non-export.
-// It also fails if the bundled playground build is from a different adorn version than ../adorn.
 //
 //   npm run check
 import {readFileSync} from 'node:fs';
@@ -47,8 +46,6 @@ for (const [mod, exports] of Object.entries(modules)) {
 }
 
 const pkgVersion = JSON.parse(readFileSync(resolve(adornDir, 'package.json'), 'utf8')).version;
-const bundled = JSON.parse(readFileSync(resolve(here, '../public/vendor/adorn.version.json'), 'utf8')).version;
-if (pkgVersion !== bundled) problems.push(`playground bundle is adorn ${bundled}, ../adorn is ${pkgVersion}: run npm run bundle`);
 
 if (problems.length) {
     console.error(`reference check failed (${problems.length}):\n  ` + problems.join('\n  '));

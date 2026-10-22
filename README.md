@@ -8,32 +8,32 @@ reference page.
 
 | Page | What it is |
 | --- | --- |
-| `public/index.html` | Overview: hero, why, how it works, **live playground**, OpenAI evidence, functional surface, stateful DbC, honest status, learn |
+| `public/index.html` | Overview: hero, why, how it works, playground signpost, OpenAI evidence, functional surface, stateful DbC, honest status, learn |
+| `public/playground.html` | A StackBlitz sandbox that installs `adorn` from npm and runs the real decorator API in a Node toolchain |
 | `public/architecture.html` | Design rules, the record/install/project trick, bands and blame, trust, projection rules, strict mode, privacy, observability, testing, deliberate boundaries |
 | `public/reference.html` | Getting started, constraint vocabulary, markers, conditions, values, projections, config, CLI, add-ons, gotchas, and a searchable API index |
 
 ## The no-drift rule, applied to the site
 
-- **The playground runs the real library.** `public/vendor/adorn.browser.js` is `../adorn/dist` bundled by
-  esbuild (`npm run bundle`), so the schema and verdict in the browser come from adorn itself.
+- **The playground runs the real library.** `public/playground.html` embeds a StackBlitz sandbox (project
+  files defined in `public/playground.js`) that does `npm i adorn@<version>`, so the schema and verdict in the
+  browser come from the published package itself. Bump the pinned version in `playground.js` on a release.
 - **Homepage outputs come from the real library.** `npm run snippets` runs `scripts/snippets.ts` with adorn's
   own ts-node and writes `public/assets/snippets.json`. Paste any changed output into `index.html`.
 - **The API index is checked.** `npm run check` fails if `public/reference-data.js` is missing a runtime export
-  of `adorn`, `adorn/test` or `adorn/otel`, names something that no longer exists, or if the bundled
-  playground is a different adorn version from `../adorn`.
+  of `adorn`, `adorn/test` or `adorn/otel`, or names something that no longer exists.
 
 ## Working on it
 
 ```bash
 npm install              # esbuild only
 (cd ../adorn && npm run build)
-npm run bundle           # refresh the playground's copy of adorn
 npm run check            # reference index vs. the real exports
 npm run serve            # http://localhost:3000
 ```
 
-Everything assumes the library is checked out next to this repo at `../adorn`. Set `ADORN_DIR` to point
-elsewhere.
+`npm run check` and `npm run snippets` assume the library is checked out next to this repo at `../adorn`
+(set `ADORN_DIR` to point elsewhere). The playground needs neither: it loads `adorn` from npm in StackBlitz.
 
 ## Deploying (Cloudflare Workers static assets)
 
@@ -53,8 +53,8 @@ After that, every deploy is:
 npm run deploy           # runs the check, then uploads public/
 ```
 
-`public/_headers` sets a few security headers and caches the vendor bundle for an hour. The social card is
-rendered from `scripts/social-card.html`; the command to re-render it is in that file.
+`public/_headers` sets a few security headers. The social card is rendered from `scripts/social-card.html`;
+the command to re-render it is in that file.
 
 ## License
 

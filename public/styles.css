@@ -357,29 +357,14 @@ td code { white-space: normal; }
 .pill.accent { background: var(--accent-soft); color: var(--accent-ink); }
 .pill.brass { background: var(--brass-soft); color: var(--brass); }
 
-/* ---------- playground ---------- */
+/* ---------- playground (StackBlitz embed) ---------- */
 
-.playground { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.1rem; }
-@media (max-width: 960px) { .playground { grid-template-columns: 1fr; } }
-.pg-toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-bottom: 1rem; }
-.pg-toolbar label { font-size: 0.88rem; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 0.45rem; min-width: 0; max-width: 100%; }
-.pg-toolbar select { border: 1px solid var(--line-strong); background: var(--surface); border-radius: 999px; padding: 0.4rem 0.8rem; min-width: 0; max-width: 100%; flex: 1 1 auto; text-overflow: ellipsis; }
-.pg-pane { display: flex; flex-direction: column; min-width: 0; }
-.pg-pane + .pg-pane { gap: 1.1rem; }
-.pg-editor {
-  width: 100%; min-height: 15rem; resize: vertical; border: 0; outline: none;
-  background: transparent; color: var(--code-ink);
-  font-family: var(--font-mono); font-size: 0.84rem; line-height: 1.6; padding: 1rem 1.1rem; tab-size: 4;
-  white-space: pre; overflow-x: auto;
-}
-.pg-editor.small { min-height: 7.5rem; }
-.pg-out { margin: 0; padding: 1rem 1.1rem; overflow: auto; max-height: 24rem; font-size: 0.82rem; line-height: 1.55; }
-.verdict { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.9rem; font-family: var(--font-mono); font-size: 0.78rem; border-top: 1px solid var(--code-line); }
-.verdict.ok { color: #7fe0ae; }
-.verdict.bad { color: #ff9d94; }
+.sb-toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem 1.1rem; align-items: center; margin-bottom: 1.25rem; }
+.sb-frame { border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); }
+.sb-frame iframe { display: block; width: 100%; border: 0; }
+.sb-embed { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 60vh; padding: 2rem; color: var(--ink-faint); }
+.sb-loading { font-family: var(--font-mono); font-size: 0.85rem; }
 .pg-note { font-size: 0.86rem; color: var(--ink-faint); margin-top: 1rem; }
-.switch { display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; }
-.switch input { accent-color: var(--accent); width: 1rem; height: 1rem; }
 
 /* ---------- status filter ---------- */
 

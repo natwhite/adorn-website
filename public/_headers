@@ -3,5 +3,14 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
-/vendor/*
-  Cache-Control: public, max-age=3600
+# The playground embeds StackBlitz WebContainers, which need the hosting page to be
+# cross-origin isolated (SharedArrayBuffer). credentialless keeps cross-origin loads
+# (Google Fonts, the jsDelivr SDK) working without needing CORP headers on them.
+# Both paths are listed because the asset server also serves playground.html at /playground.
+/playground.html
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
+
+/playground
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
