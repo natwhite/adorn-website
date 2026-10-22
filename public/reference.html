@@ -112,7 +112,7 @@ export class WeatherTool {
     }
 }
 
-// Hand this to any function-calling API as the tool's `parameters`:
+// Hand this to a JSON-Schema-style function-calling API as the tool's `parameters`, subject to the provider's dialect:
 export const parameters = toolSchemaForMethod(WeatherTool, 'getWeather');
 </pre></figure>
 
@@ -228,6 +228,20 @@ new Bank().withdraw(0, 100);    // throws @GreaterThanEqual(1) on `amount`
             </table>
           </div>
           <p>All four stack on one signature. A guard that <em>returns</em> <code>false</code> means "not enabled"; a guard that <em>throws</em> is treated as a defect in the guard itself and propagates unchanged.</p>
+          <h3>Pre-state capture: <code>old</code></h3>
+          <p><code>@Ensures</code> also has an options form, <code>@Ensures({ predicate, capture?, description?, id? })</code>. When <code>capture</code> is given, <code>capture(...args)</code> runs at call <em>entry</em>; its deep-cloned, frozen result is passed to the predicate as <code>old</code>, ahead of the arguments. That lets a postcondition compare the final result against pre-call state, so a body that mutates one of its arguments can't mask its own violation. The same <code>capture</code> form is available on <code>contract()</code> and <code>contract.checked</code>'s <code>ensures</code>.</p>
+          <figure class="code"><div class="code-head"><span>old — the snapshot taken before the call</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+@Ensures({
+    capture: (account: Account) =&gt; ({ balance: account.balance }),       // snapshot at entry
+    predicate: (result: number, old, account: Account) =&gt;
+        account.balance === old.balance - result,                        // compare against the frozen snapshot
+})
+withdraw(account: Account, @GreaterThan(0) amount: number): number {
+    account.balance -= amount;   // mutates the argument; `old` still holds the entry balance
+    return amount;
+}
+</pre></figure>
         </section>
 
         <section id="fields">
@@ -254,11 +268,23 @@ class Account {
                 <tr><td><code>Verify.that(d, name, value)</code></td><td>The same check, but it throws, returning the narrowed value on success.</td></tr>
                 <tr><td><code>toolSchemaFrom({name, description, params}, opts)</code></td><td>Tool schemas whose permitted values are known only at runtime.</td></tr>
                 <tr><td><code>contract(spec, fn)</code></td><td>Enforcing params, requires, ensures and returns on a plain function, sync or async.</td></tr>
+                <tr><td><code>contract.checked(spec, fn)</code></td><td>The non-throwing twin of <code>contract()</code>. Each call returns a <code>ContractVerdict</code> as a value instead of throwing, so a verdict consumer and a thrown violation can't disagree.</td></tr>
                 <tr><td><code>violationFromCheck(result)</code></td><td>Emitting a functional refusal on the observation stream.</td></tr>
                 <tr><td><code>defineConstraint({...})</code></td><td>Your own first-class constraint, which projects like a built-in.</td></tr>
               </tbody>
             </table>
           </div>
+          <p><code>contract.checked(spec, fn)</code> is the non-throwing twin of <code>contract()</code>: it runs the same bands through the same oracles and builds any failure through the same builders, but each call returns a <code>ContractVerdict</code> as data rather than throwing, and it touches no global state (never the violation policy, never the sink). A verdict is <code>{ok: true, value}</code> on success, <code>{ok: false, band, index, id?, facts, value?, message}</code> on a contract failure, or <code>{ok: false, band: 'body', error}</code> when the body itself throws. It carries the settled return and a localized <code>path</code>, and <code>{evaluate: 'all'}</code> collects every failure rather than only the first. Because both paths share those builders, a verdict consumer and a thrown violation can't disagree.</p>
+          <figure class="code"><div class="code-head"><span>a verdict as data, nothing thrown</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+const settle = contract.checked(
+    { returns: NumberContracts.GreaterThanEqual(0) },
+    (amount: number, balance: number) =&gt; balance - amount,
+);
+
+settle(30, 100);    // { ok: true, value: 70 }
+settle(150, 100);   // { ok: false, band: 'returns', facts, value: -50, message, … }
+</pre></figure>
           <figure class="code"><div class="code-head"><span>per-session tool</span><button class="copy" type="button">copy</button></div>
 <pre data-lang="ts">
 const params = {
@@ -362,7 +388,7 @@ setObservationSink(createOtelSink());
 
         <section id="index">
           <h2>API index</h2>
-          <p>Every runtime export of <code>adorn</code>, <code>adorn/test</code> and <code>adorn/otel</code>. The site's build check fails if this list drifts from the library. Press <kbd>/</kbd> to search.</p>
+          <p>Every runtime export of <code>adorn</code> and its curated subpaths — <code>adorn/schema</code>, <code>adorn/introspection</code>, <code>adorn/observe</code>, <code>adorn/privacy</code>, <code>adorn/test</code> and <code>adorn/otel</code>. The site's build check fails if this list drifts from the library. Press <kbd>/</kbd> to search.</p>
           <div class="ref-controls">
             <input id="refSearch" class="ref-search" type="search" placeholder="Search names, signatures, descriptions…" aria-label="Search the API index">
             <span id="refCount" class="ref-count" aria-live="polite"></span>

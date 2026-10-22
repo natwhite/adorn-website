@@ -182,7 +182,7 @@ _Look up a weather forecast._
       <div class="container">
         <div class="section-head reveal">
           <p class="eyebrow">Why adorn</p>
-          <h2>Intent belongs on the signature, not scattered around it.</h2>
+          <h2>Intent belongs with the declaration, not scattered around it.</h2>
           <p>
             A function's intent is usually spread across a check buried in the body, a schema in another file,
             a sentence in the docs and a hand-written test. Each one is maintained by hand, so each one drifts.
@@ -229,7 +229,7 @@ _Look up a weather forecast._
 
         <div class="projections">
           <article class="card projection reveal"><span class="where">core</span><h3>Runtime validation</h3><p>Runs on every call. A <code>guard</code> contract is kept in production; an <code>assert</code> is an internal self-check that's stripped there.</p></article>
-          <article class="card projection reveal"><span class="where">core</span><h3>LLM tool schema</h3><p><code>toolSchemaForMethod</code> produces the exact <code>parameters</code> object a function-calling API wants, with OpenAI strict mode via <code>{provider: 'openai', strict: true}</code>.</p></article>
+          <article class="card projection reveal"><span class="where">core</span><h3>LLM tool schema</h3><p><code>toolSchemaForMethod</code> produces the <code>parameters</code> object a JSON-Schema-style function-calling API wants, subject to the provider's dialect, with OpenAI strict mode via <code>{provider: 'openai', strict: true}</code>.</p></article>
           <article class="card projection reveal"><span class="where">core</span><h3>JSON Schema 2020-12</h3><p><code>schemaForClass</code> describes what enforcement will accept. When unsure it falls back to the weaker true statement, because an over-claiming schema is worse than none.</p></article>
           <article class="card projection reveal"><span class="where">core</span><h3>Documentation</h3><p>Markdown generated from the same statement that's enforced: <code>documentClass</code> → <code>renderMarkdown</code>, or <code>adorn docs</code> from the CLI.</p></article>
           <article class="card projection reveal"><span class="where">core</span><h3>Observability</h3><p>A neutral, zero-dependency sink receives value-free violation and completion facts. <code>adorn/otel</code> maps them onto OpenTelemetry.</p></article>
@@ -425,7 +425,7 @@ console.log(formatSequenceReport(report));
           <li data-status="rough"><span class="pill warn">rough</span><div><strong>Closures can't be projected</strong><span><code>@Requires</code>, <code>@Ensures</code> and <code>@EnabledWhen</code> are enforced but invisible to docs and schema.</span></div></li>
           <li data-status="rough"><span class="pill warn">rough</span><div><strong>No constructor-parameter decorators yet</strong><span>Validate at construction with a <code>@Validate()</code> static factory instead.</span></div></li>
           <li data-status="rough"><span class="pill warn">rough</span><div><strong>Legacy decorators only</strong><span>The decorator path needs <code>experimentalDecorators</code> (legacy TypeScript decorators, not the TC39 standard). No runtime metadata required; the descriptor-first path needs no flags.</span></div></li>
-          <li data-status="next"><span class="pill accent">next</span><div><strong>TC39 standard decorators adapter</strong><span><code>adorn/stage3</code>, recording into the same core model, so the paradigm survives the language's decorator transition.</span></div></li>
+          <li data-status="next"><span class="pill accent">next</span><div><strong>TC39 standard decorators adapter</strong><span><code>adorn/standard</code>, recording into the same core model, so the paradigm survives the language's decorator transition.</span></div></li>
           <li data-status="next"><span class="pill accent">next</span><div><strong><code>old()</code> and constructor contracts</strong><span>Postconditions that reference pre-call state, and invariants established at construction. Both wait on evidence from real use.</span></div></li>
           <li data-status="next"><span class="pill accent">next</span><div><strong>Format arbitraries for the fuzzer</strong><span>The fuzzer currently <em>declines</em> on string formats rather than guessing.</span></div></li>
           <li data-status="next"><span class="pill accent">next</span><div><strong>Add-on ecosystem</strong><span>Resilience, rate-limit, idempotency, cache and policy decorators, deliberately kept out of core.</span></div></li>

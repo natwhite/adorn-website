@@ -1,6 +1,7 @@
 // The searchable public-surface index for reference.html.
 //
-// Every runtime export of `adorn`, `adorn/test` and `adorn/otel` has exactly one entry here, and
+// Every runtime export of `adorn`, `adorn/schema`, `adorn/introspection`, `adorn/observe`, `adorn/privacy`,
+// `adorn/test` and `adorn/otel` has exactly one entry here, and
 // `npm run check` (scripts/check-reference.mjs) fails if an export is missing or an entry names
 // something that no longer exists. That keeps the index from drifting from the library.
 window.ADORN_REFERENCE = [
@@ -78,7 +79,7 @@ window.ADORN_REFERENCE = [
   // ---- Working with values ----
   { name: 'Verify', module: 'adorn', cat: 'values', sig: 'Verify.that(d, name, v) | Verify.check(d, name, v)', desc: 'Validates an unknown value. that throws; check returns a CheckResult. Both narrow to the output type, and failures carry path and expected.' },
   { name: 'violationFromCheck', module: 'adorn/observe', cat: 'values', sig: 'violationFromCheck(result, {parameter?})', desc: 'Turns a failed check into ViolationFacts so it can be emitted on the observation stream.' },
-  { name: 'contract', module: 'adorn', cat: 'values', sig: 'contract({params, requires, ensures, returns, observe}, fn)', desc: 'The functional twin of @Contract. Wraps a plain function with no class, settles async results, and runs the same oracles.' },
+  { name: 'contract', module: 'adorn', cat: 'values', sig: 'contract({params, requires, ensures, returns, observe}, fn) | contract.checked(spec, fn, {evaluate?})', desc: 'The functional twin of @Contract. Wraps a plain function with no class, settles async results, and runs the same oracles. contract.checked is the non-throwing twin: each call returns a ContractVerdict as data (ok/value, or band/index/facts/message on failure) instead of throwing, with no global state.' },
   { name: 'contractSpecOf', module: 'adorn', cat: 'values', sig: 'contractSpecOf(fn)', desc: 'Reads back the spec a contract()-wrapped function carries, for the fuzzer and other tooling.' },
 
   // ---- Projections (adorn/schema) ----

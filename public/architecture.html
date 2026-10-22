@@ -179,7 +179,7 @@ toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', mu
                 <tr><td>Parameter constraints</td><td>one argument</td><td>before</td><td>caller</td><td><span class="pill ok">yes</span></td></tr>
                 <tr><td><code>@Requires</code></td><td>all args</td><td>before</td><td>caller</td><td><span class="pill warn">no, closure</span></td></tr>
                 <tr><td><code>@Returns</code></td><td>settled result</td><td>after</td><td>callee</td><td><span class="pill ok">yes</span></td></tr>
-                <tr><td><code>@Ensures</code></td><td>result + args</td><td>after</td><td>callee</td><td><span class="pill warn">no, closure</span></td></tr>
+                <tr><td><code>@Ensures</code></td><td>result + args (+ <code>old</code>)</td><td>after</td><td>callee</td><td><span class="pill warn">no, closure</span></td></tr>
                 <tr><td>Field <code>@Enforce</code></td><td>assigned value</td><td>on set</td><td>assigner</td><td><span class="pill ok">yes</span></td></tr>
               </tbody>
             </table>
@@ -192,6 +192,7 @@ toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', mu
             state", an expected skip that no choice of arguments could satisfy.
           </p>
           <p>The postcondition bands run on the <em>settled</em> value. adorn's shared <code>settle</code> classifier handles sync returns, thenables and observable-like values, so an async method's contract is checked against what it resolves to.</p>
+          <p>Written in its options form, <code>@Ensures({ predicate, capture })</code> also sees pre-state: <code>capture(...args)</code> runs at call entry and its deep-cloned, frozen result reaches the predicate as <code>old</code>, so a body that mutates one of its arguments can't mask its own violation.</p>
         </section>
 
         <section id="trust">
@@ -338,7 +339,7 @@ const parameters = toolSchemaFrom({
           <p>These are things adorn currently doesn't do, recorded as decisions rather than oversights.</p>
           <div class="grid grid-2">
             <div class="card"><h3>No TypeScript cross-check</h3><p><code>@GreaterThan(0) x: string</code> compiles. adorn removes drift <em>between projections</em>; it doesn't reconcile the descriptor with TypeScript's own view.</p></div>
-            <div class="card"><h3>Legacy decorators</h3><p>Parameter decorators exist only in legacy TypeScript. A Stage-3 adapter recording into the same core is on the roadmap.</p></div>
+            <div class="card"><h3>Legacy decorators</h3><p>Parameter decorators exist only in legacy TypeScript. A standard-decorators adapter recording into the same core is on the roadmap.</p></div>
             <div class="card"><h3>Closures stay closures</h3><p><code>@Requires</code>, <code>@Ensures</code> and <code>@EnabledWhen</code> carry no identity, so they're enforced and fuzzed but never projected.</p></div>
             <div class="card"><h3>Names from <code>toString()</code></h3><p>Parameter names are recovered from source text, so minification degrades them, though enforcement and projections degrade together.</p></div>
             <div class="card"><h3>No per-request policy</h3><p>Divergent enforcement per concurrent context isn't expressible today. Configuration is process-level.</p></div>
