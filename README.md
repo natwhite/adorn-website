@@ -2,9 +2,7 @@
 
 The website for [adorn](https://github.com/natwhite/adorn), served at **https://adorn-ts.dev**.
 
-Plain static HTML, CSS and JS in `public/`, with no framework and no build step to serve it. It's modelled
-on the structure of [forma-lang.dev](https://forma-lang.dev): an overview, an architecture page and a
-reference page.
+Plain static HTML, CSS and JS in `public/`, with no framework and no build step to serve it.
 
 | Page | What it is |
 | --- | --- |
