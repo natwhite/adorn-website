@@ -7,9 +7,10 @@ import {writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {
     Contract, Tool, Describe, NotEmpty, OneOf, GreaterThanEqual, LessThanEqual,
-    toolSchemaForMethod, documentClass, renderMarkdown, telemetryForClass, serializeTelemetry,
     setContractDiagnosticsEnabled,
 } from '../../adorn/dist/index';
+import {toolSchemaForMethod, documentClass, renderMarkdown} from '../../adorn/dist/schema';
+import {telemetryForClass, serializeTelemetry} from '../../adorn/dist/privacy';
 
 setContractDiagnosticsEnabled(false);
 

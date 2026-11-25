@@ -177,9 +177,9 @@ toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', mu
               <tbody>
                 <tr><td><code>@EnabledWhen</code></td><td>receiver + args</td><td>before</td><td>caller ("not enabled in this state")</td><td><span class="pill warn">no, closure</span></td></tr>
                 <tr><td>Parameter constraints</td><td>one argument</td><td>before</td><td>caller</td><td><span class="pill ok">yes</span></td></tr>
-                <tr><td><code>@Requires</code></td><td>all args</td><td>before</td><td>caller</td><td><span class="pill warn">no, closure</span></td></tr>
+                <tr><td><code>@Requires</code></td><td>all args</td><td>before</td><td>caller</td><td><span class="pill warn">closure: no; relation: docs</span></td></tr>
                 <tr><td><code>@Returns</code></td><td>settled result</td><td>after</td><td>callee</td><td><span class="pill ok">yes</span></td></tr>
-                <tr><td><code>@Ensures</code></td><td>result + args (+ <code>old</code>)</td><td>after</td><td>callee</td><td><span class="pill warn">no, closure</span></td></tr>
+                <tr><td><code>@Ensures</code></td><td>result + args (+ <code>old</code>)</td><td>after</td><td>callee</td><td><span class="pill warn">closure: no; relation: docs</span></td></tr>
                 <tr><td>Field <code>@Enforce</code></td><td>assigned value</td><td>on set</td><td>assigner</td><td><span class="pill ok">yes</span></td></tr>
               </tbody>
             </table>
@@ -190,6 +190,14 @@ toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', mu
             <code>@Requires</code> means "these arguments are never valid", which is a generation signal that
             shapes an input schema. A failed <code>@EnabledWhen</code> means "correctly not enabled in this
             state", an expected skip that no choice of arguments could satisfy.
+          </p>
+          <p>
+            <code>@Requires</code> and <code>@Ensures</code> also take a <em>relation</em>: the same clause written
+            as a descriptor over the call's bindings (<code>{args}</code> before, <code>{result, args, old?}</code>
+            after), built from <code>RelationContracts</code> or <code>TimeContracts</code>. It runs in the same band
+            with the same blame, and because it is data it names itself in messages and violation facts, renders in
+            generated docs, and round-trips through JSON. JSON Schema has no keyword for a relation between
+            properties, so it stays out of schemas.
           </p>
           <p>The postcondition bands run on the <em>settled</em> value. adorn's shared <code>settle</code> classifier handles sync returns, thenables and observable-like values, so an async method's contract is checked against what it resolves to.</p>
           <p>Written in its options form, <code>@Ensures({ predicate, capture })</code> also sees pre-state: <code>capture(...args)</code> runs at call entry and its deep-cloned, frozen result reaches the predicate as <code>old</code>, so a body that mutates one of its arguments can't mask its own violation.</p>
@@ -340,7 +348,7 @@ const parameters = toolSchemaFrom({
           <div class="grid grid-2">
             <div class="card"><h3>No TypeScript cross-check</h3><p><code>@GreaterThan(0) x: string</code> compiles. adorn removes drift <em>between projections</em>; it doesn't reconcile the descriptor with TypeScript's own view.</p></div>
             <div class="card"><h3>Legacy decorators</h3><p>Parameter decorators exist only in legacy TypeScript. A standard-decorators adapter recording into the same core is on the roadmap.</p></div>
-            <div class="card"><h3>Closures stay closures</h3><p><code>@Requires</code>, <code>@Ensures</code> and <code>@EnabledWhen</code> carry no identity, so they're enforced and fuzzed but never projected.</p></div>
+            <div class="card"><h3>Closures stay closures</h3><p>A closure in <code>@Requires</code>, <code>@Ensures</code> or <code>@EnabledWhen</code> carries no identity, so it's enforced and fuzzed but never projected. Write a <code>@Requires</code> or <code>@Ensures</code> clause as a relation and it projects to docs.</p></div>
             <div class="card"><h3>Names from <code>toString()</code></h3><p>Parameter names are recovered from source text, so minification degrades them, though enforcement and projections degrade together.</p></div>
             <div class="card"><h3>No per-request policy</h3><p>Divergent enforcement per concurrent context isn't expressible today. Configuration is process-level.</p></div>
             <div class="card"><h3>Add-ons stay out of core</h3><p>Resilience, limits, caching and policy decorators belong in separate packages, so the root stays dependent on <code>tslib</code> only.</p></div>
