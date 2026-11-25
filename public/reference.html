@@ -157,13 +157,15 @@ const tool = toolSchemaForMethod(WeatherService, 'getWeather', {
                 <tr><td><code>@MinLength(n)</code> · <code>@MaxLength(n)</code> · <code>@StringMinLength(n)</code></td><td>length bounds</td><td><code>minLength</code> · <code>maxLength</code></td></tr>
                 <tr><td><code>@NotEmpty()</code></td><td>a non-empty string</td><td><code>minLength: 1</code></td></tr>
                 <tr><td><code>@Matches(pattern, flags?)</code></td><td>matches the pattern</td><td><code>pattern</code></td></tr>
-                <tr><td><code>@Email()</code> · <code>@Url()</code></td><td>email · URL</td><td><code>pattern</code> · <code>format: uri</code></td></tr>
+                <tr><td><code>@Email()</code> · <code>@Url()</code></td><td>a simple-shape ASCII email · URL</td><td><code>format: email</code> · <code>format: uri</code></td></tr>
                 <tr><td><code>@Uuid()</code> · <code>@DateTime()</code> · <code>@Ipv4()</code> · <code>@Format(name)</code></td><td>validating formats; date-time is strict RFC 3339</td><td><code>format</code></td></tr>
                 <tr><td><code>@OneOf([...])</code></td><td>strict <code>===</code> membership</td><td><code>enum</code></td></tr>
                 <tr><td><code>@Const(v)</code></td><td>exactly <code>v</code></td><td><code>const</code></td></tr>
               </tbody>
             </table>
           </div>
+          <p>String lengths count Unicode code points, so they agree with the <code>minLength</code>/<code>maxLength</code> they emit. <code>@Format(name)</code> also takes the named formats <code>hex</code>, <code>lowercase-hex</code>, <code>digits</code>, <code>ascii-letters</code>, <code>iso-date</code>, <code>iso-datetime</code>, <code>email</code>, <code>e164-phone</code> and <code>url-http</code>. Literal text is descriptor-only: <code>StringContracts.StartsWith(prefix)</code>, <code>EndsWith(suffix)</code> and <code>Contains(part)</code> compare UTF-16 code units, case-sensitive, and project to an escaped, anchored <code>pattern</code>.</p>
+          <p>Times are descriptor-only too. <code>TimeContracts.Date()</code>, <code>Timestamp()</code> and <code>Duration()</code> accept RFC 3339 dates and timestamps and ISO 8601 durations, with optional inclusive <code>{min, max}</code> bounds written in the same form, and compare them as instants and lengths rather than as strings: <code>'2026-01-01T00:30:00+01:00'</code> is refused by <code>Timestamp({min: '2026-01-01T00:00:00Z'})</code>, because it is half an hour before it. A value that is not a valid time is refused, never coerced.</p>
           <p>Stacked decorators conjoin and evaluate top to bottom. <code>@Positive()</code> and friends were removed on purpose, because a name can't carry a boundary. Write <code>@GreaterThan(0)</code>.</p>
         </section>
 
@@ -249,6 +251,22 @@ withdraw(account: Account, @GreaterThan(0) amount: number): number {
     return amount;
 }
 </pre></figure>
+          <h3>Relations as data: <code>RelationContracts</code></h3>
+          <p>A clause that relates arguments to each other, or the result to the inputs, can be a descriptor instead of a closure. Operands are <code>Arg(index, ...path)</code>, <code>Result(...path)</code>, <code>Old(...path)</code> and <code>Value(json)</code>; clauses are <code>Equal</code>, <code>NotEqual</code>, <code>LessThan</code>, <code>LessThanEqual</code>, <code>GreaterThan</code>, <code>GreaterThanEqual</code>, <code>Satisfies</code>, <code>All</code>, <code>Any</code>, <code>Not</code> and <code>Implies</code>. A relation is enforced exactly as a closure is, and it also names itself in the violation message and facts, appears in generated docs, and round-trips through JSON. A built-in relation is passed bare; any other descriptor over the call's bindings, such as a <code>TimeContracts</code> comparison, goes in as <code>{relation: d}</code>.</p>
+          <figure class="code"><div class="code-head"><span>the overdraw check, as data</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+const { Arg } = RelationContracts;
+
+const withdraw = contract.checked(
+    { requires: [RelationContracts.LessThanEqual(Arg(0), Arg(1))] },
+    (amount: number, balance: number) =&gt; balance - amount,
+);
+withdraw(150, 100);   // { ok: false, band: 'requires', message: 'Precondition not met (args[0] &lt;= args[1])', … }
+
+// Times compare as instants, not strings.
+const stay = { relation: TimeContracts.LessThan('date', Arg(0), Arg(1)) };
+</pre></figure>
+          <p><code>normalise(clause)</code> and <code>sameNormalForm(a, b)</code> (from <code>adorn/introspection</code>) give a relational clause a normal form, so a reworded clause (De Morgan, a mirrored comparison, reordered operands) can be told from a changed one. The rules are sound, not complete: <code>true</code> means the two hold on the same bindings, <code>false</code> shows nothing.</p>
         </section>
 
         <section id="fields">
@@ -277,6 +295,7 @@ class Account {
                 <tr><td><code>contract(spec, fn)</code></td><td>Enforcing params, requires, ensures and returns on a plain function, sync or async.</td></tr>
                 <tr><td><code>contract.checked(spec, fn)</code></td><td>The non-throwing twin of <code>contract()</code>. Each call returns a <code>ContractVerdict</code> as a value instead of throwing, so a verdict consumer and a thrown violation can't disagree.</td></tr>
                 <tr><td><code>violationFromCheck(result)</code></td><td>Emitting a functional refusal on the observation stream.</td></tr>
+                <tr><td><code>numericBoundOf(facts)</code></td><td>Reading a refusal by a numeric bound as data: where the bound is and which side refused, or <code>undefined</code> for any other refusal. From <code>adorn/observe</code>.</td></tr>
                 <tr><td><code>defineConstraint({...})</code></td><td>Your own first-class constraint, which projects like a built-in.</td></tr>
               </tbody>
             </table>
