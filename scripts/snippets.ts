@@ -6,7 +6,7 @@
 import {writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {
-    Contract, Tool, Describe, NotEmpty, OneOf, GreaterThanEqual, LessThanEqual,
+    Contract, Describe, NotEmpty, OneOf, GreaterThanEqual, LessThanEqual,
     setContractDiagnosticsEnabled,
 } from '../../adorn/dist/index';
 import {toolSchemaForMethod, documentClass, renderMarkdown} from '../../adorn/dist/schema';
@@ -14,30 +14,35 @@ import {telemetryForClass, serializeTelemetry} from '../../adorn/dist/privacy';
 
 setContractDiagnosticsEnabled(false);
 
+// The canonical homepage example: a plain contracted method, no @Tool. The tool description is given at
+// the projection call site, as the homepage shows it.
 @Contract()
-class WeatherTool {
-    @Tool('Look up a weather forecast.')
+class WeatherService {
     getWeather(
         @Describe('the city to look up') @NotEmpty() location: string,
         @OneOf(['celsius', 'fahrenheit']) unit: string,
         @GreaterThanEqual(1) @LessThanEqual(7) days: number,
     ): string {
-        return `${location} ${unit} ${days}`;
+        return `${days}-day forecast for ${location} in ${unit}`;
     }
 }
 
 let violation = '';
 try {
-    new WeatherTool().getWeather('Lisbon', 'celsius', 99);
+    new WeatherService().getWeather('Lisbon', 'celsius', 99);
 } catch (e) {
     violation = (e as Error).message;
 }
 
 const out = {
-    toolSchema: JSON.stringify(toolSchemaForMethod(WeatherTool, 'getWeather'), null, 2),
+    toolSchema: JSON.stringify(
+        toolSchemaForMethod(WeatherService, 'getWeather', {description: 'Look up a weather forecast.'}),
+        null,
+        2,
+    ),
     violation,
-    markdown: renderMarkdown([documentClass(WeatherTool)]),
-    telemetry: serializeTelemetry(telemetryForClass(WeatherTool)),
+    markdown: renderMarkdown([documentClass(WeatherService)]),
+    telemetry: serializeTelemetry(telemetryForClass(WeatherService)),
 };
 writeFileSync(resolve(__dirname, '../public/assets/snippets.json'), JSON.stringify(out, null, 2) + '\n');
 console.log(JSON.stringify(out, null, 2));

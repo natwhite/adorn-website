@@ -138,27 +138,28 @@ Value Error: WeatherService.getWeather(location, unit, days)
 <pre data-lang="bash">
 ### WeatherService.getWeather(location, unit, days)
 
-| Parameter    | Constraint | Expectation                          |
-| ------------ | ---------- | ------------------------------------ |
-| `location`   | notEmpty   | a non-empty string                   |
-| `unit`       | oneOf      | one of "celsius", "fahrenheit"       |
-| `days`       | min        | a number greater than or equal to 1  |
-| `days`       | max        | a number less than or equal to 7     |
+| Parameter | Type | Constraint | Expectation | Description |
+| --- | --- | --- | --- | --- |
+| `location` (0) | — | `notEmpty` | a non-empty string | the city to look up |
+| `unit` (1) | — | `oneOf` | one of "celsius", "fahrenheit" | — |
+| `days` (2) | — | `min` | a number greater than or equal to 1 | — |
+| `days` (2) | — | `max` | a number less than or equal to 7 | — |
 </pre>
               </figure>
               <figure class="code derive-panel" id="p-tele" role="tabpanel" aria-labelledby="t-tele" hidden>
                 <div class="code-head"><span>serializeTelemetry(telemetryForClass(WeatherService))</span></div>
 <pre data-lang="bash">
-## WeatherService · getWeather
+> This reports what each position is **configured to disclose**, from recorded declarations. It makes no claim that a value ever actually flowed at runtime.
 
-| Position | Name       | Discloses          | @Sensitive |
-| -------- | ---------- | ------------------ | ---------- |
-| #0       | `location` | redacted (default) | —          |
-| #1       | `unit`     | redacted (default) | —          |
-| #2       | `days`     | redacted (default) | —          |
+## WeatherService
 
-> Reports what each position is configured to disclose. It makes no
-> claim that a value ever actually flowed at runtime.
+### getWeather
+
+| Position | Name | Discloses | @Sensitive |
+| --- | --- | --- | --- |
+| #0 | `location` | redacted (default) | — |
+| #1 | `unit` | redacted (default) | — |
+| #2 | `days` | redacted (default) | — |
 </pre>
               </figure>
             </div>
@@ -301,7 +302,7 @@ Value Error: WeatherService.getWeather(location, unit, days)
             <div class="fanout-node"><span class="fanout-tag enforce">enforce</span><strong>Runtime predicate</strong><code>getWeather(_, _, 99) &rarr; violation</code></div>
             <div class="fanout-node"><span class="fanout-tag project">project</span><strong>JSON Schema</strong><code>{ minimum: 1, maximum: 7 }</code></div>
             <div class="fanout-node"><span class="fanout-tag project">project</span><strong>LLM tool schema</strong><code>the same, in the provider's dialect</code></div>
-            <div class="fanout-node"><span class="fanout-tag project">project</span><strong>Documentation</strong><code>"a number from 1 to 7"</code></div>
+            <div class="fanout-node"><span class="fanout-tag project">project</span><strong>Documentation</strong><code>"a number less than or equal to 7"</code></div>
             <div class="fanout-node"><span class="fanout-tag project">project</span><strong>Property tests</strong><code>fast-check arbitrary in [1, 7]</code></div>
             <div class="fanout-node"><span class="fanout-tag reason">reason</span><strong>Privacy review</strong><code>disclosure, value-free</code></div>
           </div>
