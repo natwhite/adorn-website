@@ -84,7 +84,7 @@
       <article class="doc">
         <section id="rules">
           <h2>Design rules</h2>
-          <p>Five rules constrain every implementation choice. Most of the decision log is these rules being applied to a specific case.</p>
+          <p>These rules constrain every implementation choice. Most of the decision log is these rules being applied to a specific case.</p>
           <div class="grid grid-2">
             <div class="card"><h3>One descriptor, many readers</h3><p>Enforcement, docs, schemas, telemetry and fuzzers read the same recorded data. No projection is allowed its own copy of a constraint.</p></div>
             <div class="card"><h3>Degrade toward the weaker truth</h3><p>When a projection can't express something exactly, it says less, never more. An over-claiming schema is worse than none.</p></div>
@@ -250,8 +250,10 @@ toolSchemaFrom({ params: { seats: even({}) } }); // seats: { type: 'integer', mu
               </tbody>
             </table>
           </div>
+          <h3>Exact objects: a keyword earns its place</h3>
+          <p>A value constraint emits <code>additionalProperties</code> only when enforcement backs it. A default <code>Fields</code>, a <code>Shape</code> and every other descriptor accept extra keys, so their descriptive fragments say nothing about them. <code>Fields(fields, {extra: 'reject'})</code> refuses an undeclared own key at runtime, so its fragment emits <code>additionalProperties: false</code>, in <code>schemaForClass</code> as well as the tool schema, and there it is a necessary condition rather than producer-steering. Exactness is per descriptor: the objects nested inside an exact <code>Fields</code> stay open unless they opt in too.</p>
           <h3>Formats never over-claim</h3>
-          <p><code>@Uuid</code>, <code>@DateTime</code> and <code>@Ipv4</code> are validating descriptors whose predicate is at least as strict as the <code>format</code> keyword they emit. <code>date-time</code> uses strict RFC 3339 with real calendar validation, not <code>Date.parse</code>.</p>
+          <p><code>@Uuid</code>, <code>@DateTime</code> and <code>@Ipv4</code> are validating descriptors whose predicate is at least as strict as the <code>format</code> keyword they emit. <code>date-time</code> uses strict RFC 3339 with real calendar validation, not <code>Date.parse</code>. Where no keyword says exactly what a check does, the fragment says less: a time bound has no keyword and is left to enforcement, and <code>Format('url-http')</code> emits only its <code>pattern</code>, because <code>format: uri</code> would accept less than the check does.</p>
         </section>
 
         <section id="strict">
