@@ -17,18 +17,17 @@
 <div>
   <div class="brand"><img src="../public/assets/logo.svg" alt="">adorn</div>
   <h1>One declaration.<br><em>Every</em> artifact.</h1>
-  <p>adorn-ts.dev · contracts as data for TypeScript</p>
+  <p>adorn-ts.dev · contract-driven development for TypeScript</p>
 </div>
 <pre><span class="d">@Contract</span>()
-<span class="k">class</span> WeatherTool {
-  <span class="d">@Tool</span>(<span class="s">'Look up a forecast.'</span>)
+<span class="k">class</span> WeatherService {
   getWeather(
     <span class="d">@NotEmpty</span>() city: <span class="k">string</span>,
     <span class="d">@Between</span>(<span class="n">1</span>, <span class="n">7</span>) days: <span class="k">number</span>,
   ) { … }
 }
-<span class="c">// → LLM tool schema
-// → runtime validation
+<span class="c">// → runtime validation
 // → JSON Schema · docs
-// → telemetry · fuzz tests</span></pre>
+// → telemetry · fuzz tests
+// → LLM tool schema</span></pre>
 </div></body></html>
