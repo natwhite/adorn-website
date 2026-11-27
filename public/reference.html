@@ -22,7 +22,7 @@
     <div class="container header-inner">
       <a class="logo" href="index.html" aria-label="adorn home">
         <img class="logo-mark" src="assets/logo.svg" alt="" width="32" height="32">
-        adorn <span class="logo-version">0.1</span>
+        adorn <span class="logo-version">0.3</span>
       </a>
       <nav class="site-nav" id="siteNav" aria-label="Site">
         <a href="index.html">Overview</a>
@@ -82,7 +82,22 @@
 <pre data-lang="bash">
 npm i adorn
 </pre></figure>
-          <p>The only runtime dependency is <code>tslib</code>. It ships <strong>dual ESM + CommonJS</strong> through its <code>exports</code> map (<code>import</code> → a tree-shakeable ESM build, <code>require</code> → CommonJS, one shared set of <code>.d.ts</code>) and supports Node.js 20.19 and later (CI runs 20.19, 22 and 24).</p>
+          <p>The only runtime dependency is <code>tslib</code>. It ships <strong>dual ESM + CommonJS</strong> through its <code>exports</code> map (<code>import</code> → a tree-shakeable ESM build, <code>require</code> → CommonJS, one shared set of <code>.d.ts</code>) and supports Node.js 20.19 and later (CI runs 20.19, 22 and 24). The ESM build shares one core across its entry points, so importing <code>adorn</code> and any subpath loads one copy, as CommonJS always did; a dual-loaded ESM and CommonJS copy also shares one registry.</p>
+          <p>The root is the authoring surface. The rest of the API sits on subpaths, so a consumer imports only what it uses, and each subpath also exports the types for what it holds:</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Entry point</th><th>What it holds</th></tr></thead>
+              <tbody>
+                <tr><td style="white-space:nowrap"><code style="overflow-wrap:normal">adorn</code></td><td>Decorators, the descriptor namespaces and the <code>Contracts</code> facade, <code>contract</code> / <code>contract.checked</code>, <code>Verify</code> / <code>Enforce</code>, <code>defineConstraint</code>, and the configuration setters.</td></tr>
+                <tr><td style="white-space:nowrap"><code style="overflow-wrap:normal">adorn/schema</code></td><td>The projections: <code>toolSchemaForMethod</code>, <code>toolSchemaFrom</code>, <code>schemaForClass</code> and the docs generators.</td></tr>
+                <tr><td style="white-space:nowrap"><code style="overflow-wrap:normal">adorn/introspection</code></td><td>The registry reads, the shared evaluators, and <code>normalise</code> / <code>sameNormalForm</code>.</td></tr>
+                <tr><td style="white-space:nowrap"><code style="overflow-wrap:normal">adorn/observe</code></td><td>Observation plumbing: <code>getObservationSink</code>, <code>nextCallId</code>, <code>settle</code>, <code>violationFromCheck</code>, <code>numericBoundOf</code>.</td></tr>
+                <tr><td style="white-space:nowrap"><code style="overflow-wrap:normal">adorn/privacy</code></td><td>The privacy-review projection: <code>telemetryForClass</code>, <code>generateTelemetryReport</code>.</td></tr>
+                <tr><td style="white-space:nowrap"><code style="overflow-wrap:normal">adorn/test</code><br><code style="overflow-wrap:normal">adorn/otel</code></td><td>The <a href="#addons">add-ons</a>, each behind an optional peer dependency.</td></tr>
+                <tr><td style="white-space:nowrap"><code style="overflow-wrap:normal">adorn/package.json</code></td><td>The package manifest, so a consumer can record which adorn it ran: <code>require('adorn/package.json').version</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
 
           <h3>2 · Enable decorators</h3>
           <figure class="code"><div class="code-head"><span>tsconfig.json</span><button class="copy" type="button">copy</button></div>
@@ -138,7 +153,7 @@ const tool = toolSchemaForMethod(WeatherService, 'getWeather', {
           </div>
           <div class="callout">
             <strong>Prefer a value to an exception?</strong>
-            <p>Validate the parsed arguments first with <code>Verify.check(ObjectContracts.Fields({...}), 'args', args)</code>, which returns <code>{ok, value}</code> or <code>{ok: false, path, expected, message}</code>. See <a href="#values">Working with values</a>.</p>
+            <p>Validate the parsed arguments first with <code>Verify.check(ObjectContracts.Fields({...}), 'args', args)</code>, which returns <code>{ok, value}</code> or <code>{ok: false, path, expected, message}</code>. Add <code>{extra: 'reject'}</code> to refuse keys the tool doesn't declare. See <a href="#values">Working with values</a>.</p>
           </div>
         </section>
 
@@ -185,10 +200,21 @@ Verify.check(member, 'member', { name: 'Ada', roles: ['admin', 'wizard'], note: 
           <ul>
             <li><code>@ArrayOf(item, {minItems?, maxItems?})</code>: every element satisfies <code>item</code>. A failure names the element's index.</li>
             <li><code>@Dictionary(value)</code>: an <strong>open</strong> map of string keys to values matching <code>value</code>.</li>
-            <li><code>@Shape(FieldClass)</code>: a <strong>closed</strong> DTO validated against another class's contracted fields.</li>
-            <li><code>ObjectContracts.Fields({...})</code>: an optional-aware object literal, with no class needed.</li>
+            <li><code>@Shape(FieldClass)</code>: a DTO validated against another class's contracted fields. Extra keys pass at runtime; the tool schema closes it.</li>
+            <li><code>ObjectContracts.Fields({...}, {extra?})</code>: an optional-aware object literal, with no class needed. Extra keys pass by default; <code>{extra: 'reject'}</code> makes it exact (below).</li>
             <li><code>@Nullable(item)</code>: also accepts <code>null</code>. This is different from <code>@Optional</code>, which means the value may be absent.</li>
           </ul>
+          <h3>Exact objects: <code>{extra: 'reject'}</code></h3>
+          <p><code>Fields({...})</code> accepts keys it doesn't declare, and its schema emits no <code>additionalProperties</code>. Pass <code>{extra: 'reject'}</code> (the <code>FieldsOptions</code> type; <code>Contracts.object</code> takes it too) to make one object exact. Once every declared field holds, the first own key that isn't declared is refused at its path, and the schema emits <code>additionalProperties: false</code>, which is then a statement about enforcement rather than producer-steering. A declared optional key is never extra. Exactness belongs to the one <code>Fields</code> that opts in, not to the objects nested in it.</p>
+          <figure class="code"><div class="code-head"><span>an exact list item</span><button class="copy" type="button">copy</button></div>
+<pre data-lang="ts">
+const items = ArrayContracts.ArrayOf(
+    ObjectContracts.Fields({ id: NumberContracts.Integer() }, { extra: 'reject' }),
+);
+
+Verify.check(items, 'items', [{ id: 1 }, { id: 2, debug: true }]);
+// { ok: false, path: [1, 'debug'], expected: "no field 'debug' (exact object with fields id)", … }
+</pre></figure>
         </section>
 
         <section id="markers">
@@ -230,9 +256,9 @@ new Bank().withdraw(0, 100);    // throws @GreaterThanEqual(1) on `amount`
               <thead><tr><th>Decorator</th><th>When</th><th>Blames</th><th>Projects</th></tr></thead>
               <tbody>
                 <tr><td><code>@EnabledWhen((self, ...args) =&gt; bool)</code></td><td>before, reads state</td><td>caller</td><td>no</td></tr>
-                <tr><td><code>@Requires((...args) =&gt; bool)</code></td><td>before</td><td>caller</td><td>no</td></tr>
+                <tr><td><code>@Requires((...args) =&gt; bool)</code> or a relation</td><td>before</td><td>caller</td><td>closure: no; relation: docs</td></tr>
                 <tr><td><code>@Returns(descriptor)</code></td><td>after, on the settled value</td><td>callee</td><td>yes</td></tr>
-                <tr><td><code>@Ensures((result, ...args) =&gt; bool)</code></td><td>after, on the settled value</td><td>callee</td><td>no</td></tr>
+                <tr><td><code>@Ensures((result, ...args) =&gt; bool)</code> or a relation</td><td>after, on the settled value</td><td>callee</td><td>closure: no; relation: docs</td></tr>
               </tbody>
             </table>
           </div>
@@ -289,7 +315,7 @@ class Account {
             <table>
               <thead><tr><th>Function</th><th>Use it for</th></tr></thead>
               <tbody>
-                <tr><td><code>Verify.check(d, name, value)</code></td><td>Untrusted input as a value, such as an HTTP 400. Narrows <code>unknown</code> and reports <code>path</code> and <code>expected</code>.</td></tr>
+                <tr><td><code>Verify.check(d, name, value)</code></td><td>Untrusted input as a value, such as an HTTP 400. Narrows <code>unknown</code> and reports <code>path</code> and <code>expected</code>; inside a composite, <code>rejectedBy</code> names the inner rule that refused.</td></tr>
                 <tr><td><code>Verify.that(d, name, value)</code></td><td>The same check, but it throws, returning the narrowed value on success.</td></tr>
                 <tr><td><code>toolSchemaFrom({name, description, params}, opts)</code></td><td>Tool schemas whose permitted values are known only at runtime.</td></tr>
                 <tr><td><code>contract(spec, fn)</code></td><td>Enforcing params, requires, ensures and returns on a plain function, sync or async.</td></tr>
@@ -428,7 +454,7 @@ setObservationSink(createOtelSink());
 
   <footer class="site-footer">
     <div class="container footer-inner">
-      <span>adorn · contracts as data for TypeScript · MIT © <span data-year>2026</span> natwhite</span>
+      <span>adorn · contract-driven development for TypeScript · MIT © <span data-year>2026</span> natwhite</span>
       <nav class="footer-links" aria-label="Footer">
         <a href="index.html">Overview</a>
         <a href="architecture.html">Architecture</a>

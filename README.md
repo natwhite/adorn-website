@@ -19,7 +19,8 @@ Plain static HTML, CSS and JS in `public/`, with no framework and no build step 
 - **Homepage outputs come from the real library.** `npm run snippets` runs `scripts/snippets.ts` with adorn's
   own ts-node and writes `public/assets/snippets.json`. Paste any changed output into `index.html`.
 - **The API index is checked.** `npm run check` fails if `public/reference-data.js` is missing a runtime export
-  of `adorn`, `adorn/test` or `adorn/otel`, or names something that no longer exists.
+  of `adorn` or any of its subpaths (`adorn/schema`, `adorn/introspection`, `adorn/observe`, `adorn/privacy`,
+  `adorn/test`, `adorn/otel`), or names something that no longer exists.
 
 ## Working on it
 

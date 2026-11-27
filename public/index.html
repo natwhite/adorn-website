@@ -27,7 +27,7 @@
     <div class="container header-inner">
       <a class="logo" href="index.html" aria-label="adorn home">
         <img class="logo-mark" src="assets/logo.svg" alt="" width="32" height="32">
-        adorn <span class="logo-version">0.1</span>
+        adorn <span class="logo-version">0.3</span>
       </a>
       <nav class="site-nav" id="siteNav" aria-label="Site">
         <a href="index.html" aria-current="page">Overview</a>
@@ -71,7 +71,7 @@
               <a class="button ghost" href="architecture.html">How it works</a>
             </div>
             <p class="status-note">
-              <strong>0.1.0, MIT.</strong> The only runtime dependency is <code>tslib</code>. It's backed by a
+              <strong>0.3, pre-1.0, MIT.</strong> The only runtime dependency is <code>tslib</code>. It's backed by a
               large test suite, and the public surface is pinned by a test so it can't drift unnoticed.
             </p>
           </div>
@@ -138,27 +138,29 @@ Value Error: WeatherService.getWeather(location, unit, days)
 <pre data-lang="bash">
 ### WeatherService.getWeather(location, unit, days)
 
-| Parameter    | Constraint | Expectation                          |
-| ------------ | ---------- | ------------------------------------ |
-| `location`   | notEmpty   | a non-empty string                   |
-| `unit`       | oneOf      | one of "celsius", "fahrenheit"       |
-| `days`       | min        | a number greater than or equal to 1  |
-| `days`       | max        | a number less than or equal to 7     |
+| Parameter | Type | Constraint | Expectation | Description |
+| --- | --- | --- | --- | --- |
+| `location` (0) | — | `notEmpty` | a non-empty string | the city to look up |
+| `unit` (1) | — | `oneOf` | one of "celsius", "fahrenheit" | — |
+| `days` (2) | — | `min` | a number greater than or equal to 1 | — |
+| `days` (2) | — | `max` | a number less than or equal to 7 | — |
 </pre>
               </figure>
               <figure class="code derive-panel" id="p-tele" role="tabpanel" aria-labelledby="t-tele" hidden>
                 <div class="code-head"><span>serializeTelemetry(telemetryForClass(WeatherService))</span></div>
 <pre data-lang="bash">
-## WeatherService · getWeather
+> This reports what each position is **configured to disclose**, from recorded
+> declarations. It makes no claim that a value ever actually flowed at runtime.
 
-| Position | Name       | Discloses          | @Sensitive |
-| -------- | ---------- | ------------------ | ---------- |
-| #0       | `location` | redacted (default) | —          |
-| #1       | `unit`     | redacted (default) | —          |
-| #2       | `days`     | redacted (default) | —          |
+## WeatherService
 
-> Reports what each position is configured to disclose. It makes no
-> claim that a value ever actually flowed at runtime.
+### getWeather
+
+| Position | Name | Discloses | @Sensitive |
+| --- | --- | --- | --- |
+| #0 | `location` | redacted (default) | — |
+| #1 | `unit` | redacted (default) | — |
+| #2 | `days` | redacted (default) | — |
 </pre>
               </figure>
             </div>
@@ -301,7 +303,7 @@ Value Error: WeatherService.getWeather(location, unit, days)
             <div class="fanout-node"><span class="fanout-tag enforce">enforce</span><strong>Runtime predicate</strong><code>getWeather(_, _, 99) &rarr; violation</code></div>
             <div class="fanout-node"><span class="fanout-tag project">project</span><strong>JSON Schema</strong><code>{ minimum: 1, maximum: 7 }</code></div>
             <div class="fanout-node"><span class="fanout-tag project">project</span><strong>LLM tool schema</strong><code>the same, in the provider's dialect</code></div>
-            <div class="fanout-node"><span class="fanout-tag project">project</span><strong>Documentation</strong><code>"a number from 1 to 7"</code></div>
+            <div class="fanout-node"><span class="fanout-tag project">project</span><strong>Documentation</strong><code>"a number less than or equal to 7"</code></div>
             <div class="fanout-node"><span class="fanout-tag project">project</span><strong>Property tests</strong><code>fast-check arbitrary in [1, 7]</code></div>
             <div class="fanout-node"><span class="fanout-tag reason">reason</span><strong>Privacy review</strong><code>disclosure, value-free</code></div>
           </div>
@@ -432,7 +434,7 @@ console.log(formatSequenceReport(report));
         <div class="section-head reveal">
           <p class="eyebrow">Honest project status</p>
           <h2>What works, what's rough, what's next.</h2>
-          <p>adorn is a focused, deliberately narrow 0.1. This page aims to make its limits as easy to find as its features.</p>
+          <p>adorn is a focused, deliberately narrow pre-1.0 library. This page aims to make its limits as easy to find as its features.</p>
         </div>
         <div class="filter" role="group" aria-label="Filter status" data-filter-for="statusList">
           <button type="button" data-filter="all" aria-pressed="true">All</button>
@@ -441,9 +443,11 @@ console.log(formatSequenceReport(report));
           <button type="button" data-filter="next" aria-pressed="false">Next</button>
         </div>
         <ul class="status-list" id="statusList">
-          <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Constraint vocabulary</strong><span>Numeric, string, formats, <code>@OneOf</code>/<code>@Const</code>, <code>@ArrayOf</code>, <code>@Dictionary</code>, <code>@Shape</code>, <code>@Nullable</code>, plus <code>defineConstraint</code> for your own.</span></div></li>
+          <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Constraint vocabulary</strong><span>Numeric, string (lengths in code points, literal text, named formats), <code>@OneOf</code>/<code>@Const</code>, <code>@ArrayOf</code>, <code>@Dictionary</code>, <code>@Shape</code>, <code>Fields</code>, <code>@Nullable</code>, dates, timestamps and durations (<code>TimeContracts</code>), plus <code>defineConstraint</code> for your own.</span></div></li>
+          <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Exact objects</strong><span><code>Fields(fields, {extra: 'reject'})</code> refuses an undeclared key at its path and emits <code>additionalProperties: false</code>. The default stays open.</span></div></li>
           <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Inheritance</strong><span>Field and method-parameter contracts are inherited. A subclass can strengthen a contract but never weaken it.</span></div></li>
-          <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Pre- and postconditions</strong><span><code>@Requires</code>, <code>@EnabledWhen</code>, <code>@Ensures</code>, and the reified, projectable <code>@Returns</code>.</span></div></li>
+          <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Pre- and postconditions</strong><span><code>@Requires</code>, <code>@EnabledWhen</code>, <code>@Ensures</code> (with <code>old</code> pre-state capture), and the reified, projectable <code>@Returns</code>. A <code>@Requires</code> or <code>@Ensures</code> clause can be a relation written as data (<code>RelationContracts</code>, <code>TimeContracts</code>), with a normal form to compare reworded clauses.</span></div></li>
+          <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Refusals as data</strong><span><code>contract.checked</code> returns each call's verdict instead of throwing; <code>rejectedBy</code> names the inner rule that refused, and <code>numericBoundOf</code> reads a bound refusal.</span></div></li>
           <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Five in-core projections</strong><span>Docs, JSON Schema, LLM tool schema (including OpenAI strict mode), observability, and privacy review.</span></div></li>
           <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Safe-by-default redaction</strong><span><code>@Sensitive</code> / <code>@Telemetry</code>, plus a build-time sensitive-flow detector (<code>adorn check</code>).</span></div></li>
           <li data-status="shipped"><span class="pill ok">shipped</span><div><strong>Add-ons as subpath exports</strong><span><code>adorn/test</code> (fuzzing, including <code>fuzzSequence</code>) and <code>adorn/otel</code>, each behind an optional peer.</span></div></li>
@@ -453,7 +457,7 @@ console.log(formatSequenceReport(report));
           <li data-status="rough"><span class="pill warn">rough</span><div><strong>Legacy decorators only</strong><span>The decorator path needs <code>experimentalDecorators</code> (legacy TypeScript decorators, not the TC39 standard). No runtime metadata required; the descriptor-first path needs no flags.</span></div></li>
           <li data-status="next"><span class="pill accent">next</span><div><strong>TC39 standard decorators adapter</strong><span><code>adorn/standard</code>, recording into the same core model, so the paradigm survives the language's decorator transition.</span></div></li>
           <li data-status="next"><span class="pill accent">next</span><div><strong>Constructor contracts and object pre-state</strong><span>Invariants established at construction, and postconditions that compare against the receiver's pre-call state. Argument pre-state already ships (<code>capture</code>). Both wait on evidence from real use.</span></div></li>
-          <li data-status="next"><span class="pill accent">next</span><div><strong>Format arbitraries for the fuzzer</strong><span>The fuzzer currently <em>declines</em> on string formats rather than guessing.</span></div></li>
+          <li data-status="next"><span class="pill accent">next</span><div><strong>Format arbitraries for the fuzzer</strong><span>The fuzzer <em>declines</em> on the named <code>Format(...)</code> strings, literal-text and time descriptors rather than guessing; uuid, date-time, ipv4, email and url already generate.</span></div></li>
           <li data-status="next"><span class="pill accent">next</span><div><strong>Add-on ecosystem</strong><span>Resilience, rate-limit, idempotency, cache and policy decorators, deliberately kept out of core.</span></div></li>
         </ul>
 
@@ -488,11 +492,11 @@ console.log(formatSequenceReport(report));
           <h2>Pick your way in.</h2>
         </div>
         <div class="grid grid-3">
-          <a class="card card-link reveal" href="reference.html#getting-started"><span class="num">START</span><h3>Getting started</h3><p>Install, enable decorators, and write a first contracted tool.</p><span class="go">Open guide →</span></a>
+          <a class="card card-link reveal" href="reference.html#getting-started"><span class="num">START</span><h3>Getting started</h3><p>Install, enable decorators, and write a first contracted method.</p><span class="go">Open guide →</span></a>
           <a class="card card-link reveal" href="reference.html"><span class="num">LOOK UP</span><h3>Reference</h3><p>Every decorator, descriptor and projection, plus a searchable index of the public surface.</p><span class="go">Open reference →</span></a>
           <a class="card card-link reveal" href="architecture.html"><span class="num">UNDERSTAND</span><h3>Architecture</h3><p>The registry, the installer, trust levels, and the rules projections follow.</p><span class="go">Read architecture →</span></a>
-          <a class="card card-link reveal" href="https://github.com/natwhite/adorn/tree/master/examples"><span class="num">RUN</span><h3>Examples</h3><p>Eight runnable scripts, one per capability, each a single <code>npx ts-node</code> away.</p><span class="go">Browse examples →</span></a>
-          <a class="card card-link reveal" href="https://github.com/natwhite/adorn/blob/master/docs/DECISIONS.md"><span class="num">WHY</span><h3>Decision log</h3><p>Ninety numbered decisions, including the ones that removed features.</p><span class="go">Read decisions →</span></a>
+          <a class="card card-link reveal" href="https://github.com/natwhite/adorn/tree/master/examples"><span class="num">RUN</span><h3>Examples</h3><p>Runnable scripts, one per capability, each a single <code>npx ts-node</code> away.</p><span class="go">Browse examples →</span></a>
+          <a class="card card-link reveal" href="https://github.com/natwhite/adorn/blob/master/docs/DECISIONS.md"><span class="num">WHY</span><h3>Decision log</h3><p>Every numbered design decision, including the ones that removed features.</p><span class="go">Read decisions →</span></a>
           <a class="card card-link reveal" href="https://github.com/natwhite/adorn/blob/master/CHANGELOG.md"><span class="num">TRACK</span><h3>Changelog</h3><p>Release notes, following Keep a Changelog and semantic versioning.</p><span class="go">Read changelog →</span></a>
         </div>
       </div>

@@ -14,7 +14,11 @@
 
   // The npm package name and version. If adorn ever moves (a scope, a rename), change it here only.
   const PKG = 'adorn';
-  const VERSION = '0.1.0';
+  const VERSION = '0.3.0';
+
+  // The toolbar note names the installed version from this one constant, so the two can't disagree.
+  const versionNote = document.getElementById('sbVersion');
+  if (versionNote) versionNote.textContent = PKG + '@' + VERSION;
 
   function showFallback() {
     if (fallback) fallback.hidden = false;
@@ -26,16 +30,15 @@
   // template literals) in the body keeps this source free of backticks so it nests cleanly here.
   const indexTs = [
     "import {",
-    "    Contract, Tool, Describe, NotEmpty, OneOf,",
+    "    Contract, Describe, NotEmpty, OneOf,",
     "    GreaterThanEqual, LessThanEqual, Verify, Contracts,",
     "} from 'adorn';",
     "import { toolSchemaForMethod } from 'adorn/schema';",
     "",
-    "// One declaration. The constraints below are the JSON Schema an LLM reads",
-    "// AND the checks its reply must pass, so the two can't drift apart.",
+    "// One declaration: the contract. The runtime check, the JSON Schema, the docs",
+    "// and an LLM tool schema are all derived from it, so they can't drift apart.",
     "@Contract()",
-    "class WeatherTool {",
-    "    @Tool('Look up a weather forecast.')",
+    "class WeatherService {",
     "    getWeather(",
     "        @Describe('the city to look up') @NotEmpty() location: string,",
     "        @OneOf(['celsius', 'fahrenheit']) unit: string,",
@@ -46,37 +49,50 @@
     "    }",
     "}",
     "",
-    "// 1 — the tool schema the model reads, derived from the decorators above:",
-    "console.log('TOOL SCHEMA\\n' + JSON.stringify(",
-    "    toolSchemaForMethod(WeatherTool, 'getWeather'), null, 2,",
-    "));",
+    "const weather = new WeatherService();",
     "",
-    "const tool = new WeatherTool();",
+    "// 1 — a valid call runs the body:",
+    "console.log('VALID    -> ' + weather.getWeather('Lisbon', 'celsius', 3));",
     "",
-    "// 2 — a valid call runs the body:",
-    "console.log('\\nVALID    -> ' + tool.getWeather('Lisbon', 'celsius', 3));",
-    "",
-    "// 3 — the model asks for 99 days: rejected before the body runs,",
+    "// 2 — a caller asks for 99 days: rejected before the body runs,",
     "//     with the value redacted by default.",
     "try {",
-    "    tool.getWeather('Lisbon', 'celsius', 99);",
+    "    weather.getWeather('Lisbon', 'celsius', 99);",
     "} catch (err) {",
     "    console.log('\\nREJECTED -> ' + (err as Error).message);",
     "}",
     "",
-    "// The same constraints without a decoration point (the descriptor-first path):",
+    "// 3 — one derived artifact: the tool schema a function-calling API reads.",
+    "//     The description is given here, at the projection call site.",
+    "console.log('\\nTOOL SCHEMA\\n' + JSON.stringify(",
+    "    toolSchemaForMethod(WeatherService, 'getWeather', {",
+    "        description: 'Look up a weather forecast.',",
+    "    }), null, 2,",
+    "));",
+    "",
+    "// The same constraints without a decoration point (the descriptor-first path).",
+    "// { extra: 'reject' } makes the object exact: an undeclared key is refused too.",
     "const params = {",
     "    location: Contracts.string.notEmpty(),",
     "    unit: Contracts.enum(['celsius', 'fahrenheit']),",
     "    days: Contracts.number.between(1, 7),",
     "};",
-    "const check = Verify.check(Contracts.object(params), 'args', {",
-    "    location: 'Oslo', unit: 'kelvin', days: 2,",
-    "});",
-    "console.log('\\nCHECK    -> ' + JSON.stringify(check, null, 2));",
+    "const args = Contracts.object(params, { extra: 'reject' });",
+    "",
+    "const replies = [",
+    "    { location: 'Oslo', unit: 'celsius', days: 2 },",
+    "    { location: 'Oslo', unit: 'kelvin', days: 2 },",
+    "    { location: 'Oslo', unit: 'celsius', days: 2, debug: true },",
+    "];",
+    "for (const reply of replies) {",
+    "    const r = Verify.check(args, 'args', reply);",
+    "    console.log('\\nCHECK    -> ' + (r.ok",
+    "        ? 'ok: ' + JSON.stringify(r.value)",
+    "        : 'refused at ' + JSON.stringify(r.path) + ': expected ' + r.expected));",
+    "}",
     "",
     "// Edit a constraint — say @LessThanEqual(7) -> 14, or Between(1, 7) -> Between(1, 14) —",
-    "// or change a reply, then save. tsx re-runs and the schema and the verdict move together.",
+    "// or change an argument, then save. tsx re-runs and the schema and the verdict move together.",
     "",
   ].join('\n');
 
@@ -124,7 +140,7 @@
 
   const project = {
     title: 'adorn playground',
-    description: 'Edit one decorated declaration and watch the tool schema and the runtime check move together.',
+    description: 'Edit one decorated declaration and watch the runtime check and the derived schema move together.',
     template: 'node',
     files: {
       'index.ts': indexTs,
