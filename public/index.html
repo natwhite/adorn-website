@@ -149,7 +149,8 @@ Value Error: WeatherService.getWeather(location, unit, days)
               <figure class="code derive-panel" id="p-tele" role="tabpanel" aria-labelledby="t-tele" hidden>
                 <div class="code-head"><span>serializeTelemetry(telemetryForClass(WeatherService))</span></div>
 <pre data-lang="bash">
-> This reports what each position is **configured to disclose**, from recorded declarations. It makes no claim that a value ever actually flowed at runtime.
+> This reports what each position is **configured to disclose**, from recorded
+> declarations. It makes no claim that a value ever actually flowed at runtime.
 
 ## WeatherService
 
@@ -456,7 +457,7 @@ console.log(formatSequenceReport(report));
           <li data-status="rough"><span class="pill warn">rough</span><div><strong>Legacy decorators only</strong><span>The decorator path needs <code>experimentalDecorators</code> (legacy TypeScript decorators, not the TC39 standard). No runtime metadata required; the descriptor-first path needs no flags.</span></div></li>
           <li data-status="next"><span class="pill accent">next</span><div><strong>TC39 standard decorators adapter</strong><span><code>adorn/standard</code>, recording into the same core model, so the paradigm survives the language's decorator transition.</span></div></li>
           <li data-status="next"><span class="pill accent">next</span><div><strong>Constructor contracts and object pre-state</strong><span>Invariants established at construction, and postconditions that compare against the receiver's pre-call state. Argument pre-state already ships (<code>capture</code>). Both wait on evidence from real use.</span></div></li>
-          <li data-status="next"><span class="pill accent">next</span><div><strong>Format arbitraries for the fuzzer</strong><span>The fuzzer currently <em>declines</em> on string formats rather than guessing.</span></div></li>
+          <li data-status="next"><span class="pill accent">next</span><div><strong>Format arbitraries for the fuzzer</strong><span>The fuzzer <em>declines</em> on the named <code>Format(...)</code> strings, literal-text and time descriptors rather than guessing; uuid, date-time, ipv4, email and url already generate.</span></div></li>
           <li data-status="next"><span class="pill accent">next</span><div><strong>Add-on ecosystem</strong><span>Resilience, rate-limit, idempotency, cache and policy decorators, deliberately kept out of core.</span></div></li>
         </ul>
 
