@@ -59,14 +59,14 @@
           <p>
             This sandbox runs <a href="https://www.npmjs.com/package/adorn">adorn</a> itself — installed from
             npm into a real Node toolchain, decorators and all, not a re-implementation. Change a constraint on
-            the declaration and re-run: the tool schema an LLM would read <em>and</em> the runtime check a reply
-            must pass move together, because both are derived from that one declaration.
+            the declaration and re-run: the runtime check an input must pass <em>and</em> the schema a consumer
+            reads (here, an LLM tool schema) move together, because both are derived from that one declaration.
           </p>
         </div>
 
         <div class="sb-toolbar">
           <a class="button primary" id="sbOpen" href="https://github.com/natwhite/adorn/tree/master/examples" target="_blank" rel="noopener">Open full screen in StackBlitz ↗</a>
-          <span class="pg-note" style="margin:0">Installs <code>adorn@0.1.0</code>. Runs in StackBlitz; nothing you type is sent to this site.</span>
+          <span class="pg-note" style="margin:0">Installs <code id="sbVersion">adorn@0.3.0</code>. Runs in StackBlitz; nothing you type is sent to this site.</span>
         </div>
 
         <div class="sb-frame">
@@ -87,12 +87,12 @@
           <article class="card">
             <span class="num">DECORATORS</span>
             <h3>The ergonomic form</h3>
-            <p>The sandbox uses the decorator syntax from the hero — <code>@NotEmpty()</code>, <code>@Between(1, 7)</code> — running under a real TypeScript toolchain, which a browser-only fiddle can't do.</p>
+            <p>The sandbox uses the decorator syntax from the hero — <code>@NotEmpty()</code>, <code>@GreaterThanEqual(1) @LessThanEqual(7)</code> — running under a real TypeScript toolchain, which a browser-only fiddle can't do.</p>
           </article>
           <article class="card">
             <span class="num">DESCRIPTORS</span>
             <h3>No decoration point needed</h3>
-            <p>The same run shows the descriptor-first path: <code>Contracts.number.between(1, 7)</code> fed to <code>Verify.check</code>, for raw <code>unknown</code> off the wire or a per-session enum.</p>
+            <p>The same run shows the descriptor-first path: <code>Contracts.number.between(1, 7)</code> fed to <code>Verify.check</code> as an exact object (<code>{extra: 'reject'}</code>), for raw <code>unknown</code> off the wire or a per-session enum.</p>
           </article>
           <article class="card">
             <span class="num">EDIT · RE-RUN</span>
